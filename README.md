@@ -11,3 +11,11 @@ data
    - FR
    - SG
 ```
+
+## Evaluation script
+```
+./eval.sh [dataset] [qn]
+# example
+./eval.sh EN 2
+./eval.sh SG 3
+```
