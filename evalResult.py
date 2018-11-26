@@ -4,6 +4,11 @@ from copy import copy
 from collections import defaultdict
 from optparse import OptionParser
 
+# column separator
+separator = ' '
+#the column index for tags
+outputColumnIndex = 1
+
 #Read entities from predcition
 def get_predicted(predicted, answers=defaultdict(lambda: defaultdict(defaultdict))):
 
@@ -68,15 +73,11 @@ def get_predicted(predicted, answers=defaultdict(lambda: defaultdict(defaultdict
     if entity:
         answers[example].append(list(entity))
 
-
     return answers
-
 
 
 #Read entities from gold data
 def get_observed(observed):
-
-
     example = 0
     word_index = 0
     entity = []
@@ -216,41 +217,33 @@ def compare_observed_to_predicted(observed, predicted):
     printResult('Entity Type',correct_sentiment, prec, rec)
 
 
-
-
 ##############Main Function##################
+if __name__ == '__main__':
+    if len(sys.argv) < 3:
+        print ('Please make sure you have installed Python 3.4 or above!')
+        print ("Usage on Windows:  python evalResult.py [gold file] [prediction file]")
+        print ("Usage on Linux/Mac:  python3 evalResult.py [gold file] [prediction file]")
+        sys.exit()
 
-if len(sys.argv) < 3:
-    print ('Please make sure you have installed Python 3.4 or above!')
-    print ("Usage on Windows:  python evalResult.py [gold file] [prediction file]")
-    print ("Usage on Linux/Mac:  python3 evalResult.py [gold file] [prediction file]")
-    sys.exit()
-
-gold = open(sys.argv[1], "r", encoding='UTF-8')
-prediction = open(sys.argv[2], "r", encoding='UTF-8')
-discardInstance = []
-
-
-if len(sys.argv) > 3 and sys.argv[3] == 'filter':
-    filterInst_file = open(sys.argv[1] + '.filter', "r", encoding='UTF-8')
-    for line in filterInst_file:
-        line = line.strip('\n')
-        line = line.strip('\r')
-        instID = int(line)
-        discardInstance.append(instID)
+    gold = open(sys.argv[1], "r", encoding='UTF-8')
+    prediction = open(sys.argv[2], "r", encoding='UTF-8')
+    discardInstance = []
 
 
-#column separator
-separator = ' '
+    if len(sys.argv) > 3 and sys.argv[3] == 'filter':
+        filterInst_file = open(sys.argv[1] + '.filter', "r", encoding='UTF-8')
+        for line in filterInst_file:
+            line = line.strip('\n')
+            line = line.strip('\r')
+            instID = int(line)
+            discardInstance.append(instID)
 
-#the column index for tags
-outputColumnIndex = 1
-#Read Gold data
-observed = get_observed(gold)
 
-#Read Predction data
-predicted = get_predicted(prediction)
+    #Read Gold data
+    observed = get_observed(gold)
 
-#Compare
-compare_observed_to_predicted(observed, predicted)
+    #Read Predction data
+    predicted = get_predicted(prediction)
 
+    #Compare
+    compare_observed_to_predicted(observed, predicted)
