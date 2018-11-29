@@ -12,7 +12,12 @@
 \usepackage{listings}
 \usepackage{tikz}
 \usepackage{pgf}
+
+\usepackage{booktabs,multirow}
 \usetikzlibrary{arrows, automata}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
 
 \setlist[description]{leftmargin=\parindent,labelindent=\parindent}
 \setlist[itemize,enumerate]{align=left}
@@ -30,8 +35,113 @@
 \setcounter{section}{1}
 
 
-\section{Maximum likelihood estimation}
+\section{Maximum Likelihood Estimation}
+Our code for Part 2 is within the files \textit{Part2.py} and \textit{Part2.ipynb}.
 
+\subsection{Emission Parameters Estimation} \label{sec:emissions}
+In order to derive the count values, we process the file as follows.
+
+Each line in the file represents a word followed by its label. For each label, we store the number of occurrences of each word in a dictionary with the key as the word, and the value as the number of occurrences. For a particular label, this results in a dictionary that looks something like the following:
+
+\begin{verbatim}
+{'Nous': 100, 'avons': 101, 'tout': 105, 'aimé': 7, '.': 1067, ... }
+\end{verbatim}
+
+We store this dictionary as the value of another dictionary, where the key represents the label. This results in the following dictionary:
+
+\begin{verbatim}
+emissions = {'B-negative': {'"': 1, 'Accueil': 7, 'Ambiance': 2, ...},
+             'B-positive': { ... }, ... }
+\end{verbatim}
+
+This allows us to efficient retrieve $\text{Count}(y \rightarrow x)$ using
+
+\begin{verbatim}emissions[y][x]\end{verbatim}
+
+Similarly, for computational efficiency, we store the counts of each label in a separate dictionary:
+
+\begin{verbatim}
+emission_counts = {'B-negative': 675, 'B-neutral': 113, 'B-positive': 810, 'I-negative': 233, 'I-neutral': 43, 'I-positive': 181, 'O': 24512}
+\end{verbatim}
+
+We can then easily retrieve $\text{Count}(y)$ using
+
+\begin{verbatim}emission_counts[x]\end{verbatim}
+
+This allows us to efficiently retrieve the emission parameters $e(x|y)$, at the cost of a minor space complexity increase.
+
+\subsection{Laplace Smoothing}
+
+For smoothing, we implement a getter function for the emission parameters. If the given word $x$ does not exist in our parameters learnt from training data, we return the smoothed version of the parameters.
+
+\begin{verbatim}
+def get_emission_parameters(emissions, emission_counts, x, y, k=1):
+    ''' Returns the MLE of the emission parameters based on the emissions dictionary '''
+    state_data = emissions[y]
+    count_y = emission_counts[y] #sum(state_data.values()) # Denominator
+    
+    # If x == "#UNK#", it will return the following
+    count_y_x = k
+    
+    # If x exists in training, return its MLE instead
+    if x != "#UNK#":
+        count_y_x = state_data[x] # Numerator
+    
+    e = count_y_x / (count_y + k)
+    return e{}
+\end{verbatim}
+
+\subsection{Sequence Labeling}
+
+For sequence labeling, we implement a function that takes as input the sentence to be labeled, and the emission parameters as described in Section \ref{sec:emissions}:
+
+\begin{verbatim}
+def label_sequence(sentence, emissions, emission_counts):
+    ''' Takes a list `sentence` that contains words of a sentence as strings '''
+    tags = []
+    
+    for word in sentence:
+        predicted_label = ""
+        max_prob = -1
+        
+        # Find y with maximum probability
+        for y in emissions:
+            
+            if word not in observations:
+                word = "#UNK#"
+            
+            if (word in emissions[y]) or (word == "#UNK#"):
+                prob = get_emission_parameters(emissions, emission_counts, word, y)
+            
+                # If this is higher than the previous highest, use this
+                if prob > max_prob:
+                    predicted_label = y
+                    max_prob = prob
+
+        # Add prediction to list
+        tags.append(predicted_label)
+    
+    return tags
+\end{verbatim}
+
+For each word, it finds the $\argmax$ over $y$, and assigns this as the tag. The final output of this function is a list containing the predicted tags.
+
+\subsection{Results}
+
+Our results on the four datasets are as follows:
+
+\begin{table}[htpb]
+\centering
+\begin{tabular}{|l|c|c|}
+\hline
+\multirow{2}{*}{\textbf{Dataset}} & \multicolumn{2}{c|}{\textbf{F-Score}} \\ \cline{2-3} 
+ & \multicolumn{1}{l|}{\textbf{Entity}} & \multicolumn{1}{l|}{\textbf{\begin{tabular}[c]{@{}l@{}}Entity\\ Type\end{tabular}}} \\ \hline
+EN & 0.6297 & 0.4595 \\ \hline
+SG & 0.2952 & 0.1501 \\ \hline
+CN & 0.1929 & 0.1134 \\ \hline
+FR & 0.2751 & 0.1169 \\ \hline
+\end{tabular}
+\end{table}
 
 \section{First-order hidden Markov model}
 
