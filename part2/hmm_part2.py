@@ -116,8 +116,8 @@ if __name__ == "__main__":
 
     print("Processing for {}".format(dataset))
 
-    train_filename = f"data/{dataset}/train"
-    validation_filename = f"data/{dataset}/dev.in"
+    train_filename = f"../data/{dataset}/train"
+    validation_filename = f"../data/{dataset}/dev.in"
 
     # Train
     emissions, emission_counts, observations = learn_emissions(train_filename)

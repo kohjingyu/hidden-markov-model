@@ -13,9 +13,11 @@ data
 ```
 
 ## Evaluation script
+Pass no arguments to run evaluation on all.
 ```
 ./eval.sh [dataset] [qn]
 # example
+./eval.sh  # eval all
 ./eval.sh EN 2
 ./eval.sh SG 3
 ```
