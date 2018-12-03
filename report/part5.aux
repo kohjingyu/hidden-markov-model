@@ -5,37 +5,64 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Laplace Smoothing}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Sequence Labeling}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Results}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {3}First-order hidden Markov model}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {4}Second-order hidden Markov model}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5}Design challenge}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}First-Order Hidden Markov Model}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Transition Parameters Emission}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Viterbi Algorithm}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.1}Initialization}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.2}Recursion}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.2.3}Backtracking}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Results}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Second-Order Hidden Markov Model}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Design Challenge}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Preprocessing}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.1.1}Tokenizing}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.1.1}String tokenization}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {5.1.2}Replacing irrelevant words}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {5.1.3}Stop words}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Inputs and labels}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}RNN}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.1}Forward}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces RNN}}{}}
-\newlabel{fig:rnn}{{1}{}}
-\newlabel{eqn:forward-all}{{1}{}}
-\newlabel{eqn:forward-h}{{2}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.2}Backward}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Simple vectorization}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.1}Tokenizing}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.2.2}One-hot encoding}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}\emph  {word2vec}}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.1}Skip-gram}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.2}Forward}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.3}Backward}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.4}Training}{}}
+\@writefile{toc}{\contentsline {paragraph}{Positive sampling}{}}
+\@writefile{toc}{\contentsline {paragraph}{Negative sampling}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces t-SNE visualization of \emph  {word2vec} model on EN dataset\relax }}{}}
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{fig:word2vec}{{1}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.5}Visualization}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Recurrent neural network (RNN)}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.4.1}Forward}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces RNN\relax }}{}}
+\newlabel{fig:rnn}{{2}{}}
+\newlabel{eqn:forward-all}{{6}{}}
+\newlabel{eqn:forward-h}{{7}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.4.2}Backward}{}}
 \@writefile{toc}{\contentsline {paragraph}{Output layer}{}}
-\newlabel{eqn:backward-o}{{3}{}}
-\newlabel{eqn:backward-c}{{4}{}}
-\newlabel{eqn:backward-V}{{5}{}}
+\newlabel{eqn:backward-o}{{8}{}}
+\newlabel{eqn:backward-c}{{9}{}}
+\newlabel{eqn:backward-V}{{10}{}}
 \@writefile{toc}{\contentsline {paragraph}{Hidden layer}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Computational graph showing gradients for $\bm  {h}^{(n)}$}}{}}
-\newlabel{fig:grad-hn}{{2}{}}
-\newlabel{eqn:backward-hn}{{6}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Computational graph showing gradients for $\bm  {h}^{(t)}$}}{}}
-\newlabel{fig:grad-ht}{{3}{}}
-\newlabel{eqn:backward-ht}{{7}{}}
-\newlabel{eqn:backward-b}{{8}{}}
-\newlabel{eqn:backward-W}{{9}{}}
-\newlabel{eqn:backward-U}{{10}{}}
-\newlabel{eqn:backward-all}{{11}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.3}Training}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.4}Evaluation}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.5}Finetuning}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.6}Summary}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Computational graph showing gradients for $\bm  {h}^{(n)}$\relax }}{}}
+\newlabel{fig:grad-hn}{{3}{}}
+\newlabel{eqn:backward-hn}{{11}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Computational graph showing gradients for $\bm  {h}^{(t)}$\relax }}{}}
+\newlabel{fig:grad-ht}{{4}{}}
+\newlabel{eqn:backward-ht}{{12}{}}
+\newlabel{eqn:backward-b}{{13}{}}
+\newlabel{eqn:backward-W}{{14}{}}
+\newlabel{eqn:backward-U}{{15}{}}
+\newlabel{eqn:backward-all}{{16}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.4.3}Training}{}}
+\@writefile{toc}{\contentsline {paragraph}{Regularization}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Distribution of labels in FR dataset\relax }}{}}
+\newlabel{fig:class-labels}{{5}{}}
+\@writefile{toc}{\contentsline {paragraph}{Batch updates}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Training loss against epochs\relax }}{}}
+\newlabel{fig:batch-updates}{{6}{}}
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {Before batch updates}}}{}}
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {After batch updates}}}{}}
+\@writefile{toc}{\contentsline {paragraph}{Class weighting}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.4.4}Evaluation}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}Results}{}}

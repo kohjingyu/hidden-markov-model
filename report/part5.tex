@@ -9,6 +9,7 @@
 \usepackage{enumitem}
 \usepackage{wrapfig}
 \usepackage{graphicx}
+\usepackage[justification=centering]{subfig}
 \usepackage{listings}
 \usepackage{tikz}
 \usepackage{pgf}
@@ -54,14 +55,15 @@ emissions = {'B-negative': {'"': 1, 'Accueil': 7, 'Ambiance': 2, ...},
              'B-positive': { ... }, ... }
 \end{verbatim}
 
-This allows us to efficient retrieve $\text{Count}(y \rightarrow x)$ using
+This allows us to efficiently retrieve $\text{Count}(y \rightarrow x)$ using
 
 \begin{verbatim}emissions[y][x]\end{verbatim}
 
 Similarly, for computational efficiency, we store the counts of each label in a separate dictionary:
 
 \begin{verbatim}
-emission_counts = {'B-negative': 675, 'B-neutral': 113, 'B-positive': 810, 'I-negative': 233, 'I-neutral': 43, 'I-positive': 181, 'O': 24512}
+emission_counts = {'B-negative': 675, 'B-neutral': 113, 'B-positive': 810,
+    'I-negative': 233, 'I-neutral': 43, 'I-positive': 181, 'O': 24512}
 \end{verbatim}
 
 We can then easily retrieve $\text{Count}(y)$ using
@@ -143,13 +145,101 @@ FR & 0.2751 & 0.1169 \\ \hline
 \end{tabular}
 \end{table}
 
-\section{First-order hidden Markov model}
+\section{First-Order Hidden Markov Model}
+\subsection{Transition Parameters Emission}
+In order to derive the transition values, we process the file as follow.\\
+Each line in the file represents a word followed by its label. For each label, we create a transition denoted by a tuple \lstinline{(previous label, current label)}. For the first and last label in each sentence, we also add the transitions \lstinline{(START, label)} and \lstinline{(label, STOP)} respectively. This results in a dictionary that looks something like the following.
 
-\section{Second-order hidden Markov model}
+\begin{verbatim}
+{('START', 'O'): 1474, ('O', 'O'): 21452, ('O', 'STOP'): 1621, ...}
+\end{verbatim}
 
-\section{Design challenge}
+In addition, for each tuple \lstinline{(a, b)} that we add to the dictionary, we also add the counts of \lstinline{a} and \lstinline{b} to a separate dictionary. This allows us to obtain the counts of each transition, as follows.
+
+\begin{verbatim}
+{'START': 1632, 'O': 24512, 'B-positive': 810, 'I-positive': 181,
+    'B-negative': 675, 'B-neutral': 113, 'I-negative': 233, 'I-neutral': 43}
+\end{verbatim}
+
+This allows us to efficiently retrieve $\text{\lstinline{Count}}(y_{i-1}, y_i)$ and $\text{\lstinline{Count}}(y_{i-1})$, and obtain the transition parameters
+	$$q(y_i | y_{i-1}) = \frac{\text{\lstinline{Count}}(y_{i-1}, y_i)}{\text{\lstinline{Count}}(y_{i-1})}$$
+Note that \lstinline{STOP} is not necessary in the second dictionary, since there will never be a transition \emph{from} \lstinline{STOP}.
+
+In addition, when $\text{\lstinline{Count}}(y^*_{i-1}) = 0$, we simply allow $q(y_i | y^*_{i-1}) = 0$.
+
+\subsection{Viterbi Algorithm}
+Combining Parts 2 and 3, we now have the estimated transition and emission parameters. We will denote them as
+	$$ a_{u, v} = q(v | u) = \frac{\text{\lstinline{Count}}(u, v)}{\text{\lstinline{Count}}(u)} $$
+	$$ b_u(x_j) = e(x | y) = \frac{\text{\lstinline{Count}}(u \rightarrow x_j)}{\text{\lstinline{Count}}(u)} $$
+
+For each sequence , a \lstinline{pandas.DataFrame} object of size $\lvert\mathcal{T}\rvert \times (n+2)$ is used to store the probabilities of a given state at a given time, where $n$ is the length of the sequence, and $\mathcal{T}$ is the set of all states in training. $(n+2)$ is used to include the \lstinline{START} and \lstinline{STOP} observations as well.\\
+
+Similarly, another \lstinline{pandas.DataFrame} object of the same size is created as a backpointer table to perform the backtracing algorithm. The probability table will be known as \lstinline{P} while the backpointer table will be known as \lstinline{B}.
+
+\subsubsection{Initialization}
+We begin by initializing $\pi(0, \text{\lstinline{START}}) = 1$.
+
+\begin{verbatim}
+    P.loc['START', 0] = 1
+\end{verbatim}
+
+\subsubsection{Recursion}
+Next, as per the Viterbi algorithm:
+	$$ \pi(j, v) = \max_{u\in\mathcal{T}} \{ \pi(j-1, u) \cdot a_{u, v} \cdot b_v(x_j) \}, \: \forall\; v \in \mathcal{T} $$
+	
+In addition, we also use the backpointer table to store the state transition $(y_{j-1}, y_j)$:
+	$$\beta(j, v) = \argmax_{u\in\mathcal{T}} \{ \pi(j-1, u) \cdot a_{u, v} \cdot b_v(x_j) \}, \: \forall\; v \in \mathcal{T} $$
+	
+\begin{verbatim}
+x_j = obs_seq[j-1]
+for v in states:  # current state
+    for u in states:  # previous state
+        p = P.loc[u, j-1] * a(u, v) * b(v, x)
+        if p > P.loc[v, j]:  # keep larger probability
+        P.loc[v, j] = p  # update probability
+        B.loc[v, j] = u  # update backpointer
+\end{verbatim}
+
+This operation is repeated for $j = \{1, ..., n+1\}$, where $x_{n+1} = \text{\lstinline{STOP}}$.
+
+\subsubsection{Backtracking}
+Finally, once the Viterbi algorithm is complete, we use the backpointer table to obtain the state sequence.
+	$$ y_{n} = \beta(n+1, \text{\lstinline{STOP}}) $$
+	$$ y_{j-1} = \beta(j, y_j),\; \forall\; j \in \{n-1, ..., 2, 1\} $$
+
+The Python implementation of this is as follows:
+\begin{verbatim}
+state_seq = ['STOP']  # initialization
+for i in range(n-1, 0, -1):  # {n-1, ..., 2, 1}
+    curr_state = state_seq[-1]  # y_j
+    prev_state = B.loc[curr_state, i]  # y_{j-1}
+    state_seq.append(prev_state)
+\end{verbatim}
+
+In special cases where there is no observed transition (i.e. $P(y_{j-1} | y_j) = 0$), we might obtain an observation sequence $x_1, x_2, ..., x_n$ that has a probability of $0$. In this scenario, we simply predict a sequence of \lstinline{O}'s.
+
+\subsection{Results}
+Our results on the four datasets are as follows:
+
+\begin{table}[htpb]
+	\centering
+	\begin{tabular}{|l|c|c|}
+		\hline
+		\multirow{2}{*}{\textbf{Dataset}} & \multicolumn{2}{c|}{\textbf{F-Score}} \\ \cline{2-3} 
+		& \multicolumn{1}{l|}{\textbf{Entity}} & \multicolumn{1}{l|}{\textbf{\begin{tabular}[c]{@{}l@{}}Entity\\ Type\end{tabular}}} \\ \hline
+		EN & 0.6379 & 0.5556 \\ \hline
+		SG & 0.4185 & 0.2531 \\ \hline
+		CN & 0.3955 & 0.2700 \\ \hline
+		FR & 0.3994 & 0.2232 \\ \hline
+	\end{tabular}
+\end{table}
+
+\section{Second-Order Hidden Markov Model}
+
+
+\section{Design Challenge}
 \subsection{Preprocessing}
-\subsubsection{Tokenizing}
+\subsubsection{String tokenization}
 Each file can be considered a corpus, the documents being each sentence in the file. Tokenizing was carried out by converting each sentence into a list of words. During tokenization, all whitespace was stripped from the beginning and end of each word. Also, each token is normalized by converting to lowercase.
 
 \subsubsection{Replacing irrelevant words}
@@ -170,11 +260,117 @@ Stop words were also initially converted to a token labeled \lstinline{#STOP#}. 
 Taking into account the negative correlation between removing stop words and $F_1$ scores, as well as the fact that we do not have French stop words, we decided not to remove stop words from the training data.
 
 
-\subsection{Inputs and labels}
+\subsection{Simple vectorization}
+We discuss an implementation to convert each word into a vector, allowing us to train a recurrent neural network (RNN) with the text sequences.
 
+\subsubsection{Tokenizing}
+Tokenizing transforms each text into a sequence of integers, which allows us to vectorize the text corpus.\\
 
+We first obtain a vocabulary of all unique words that have appeared in the training data.  We then assign a unique integer to each word, as well as 1 additional integer for the \lstinline{#UNK#} token, which denotes words not present in the vocabulary.
 
-\subsection{RNN}
+\begin{verbatim}
+{'rt': 0,
+ '#AT#': 1,
+ '#PUNC#': 2,
+ 'encore': 3,
+ ...,
+ 'bpa': 2502,
+ '#UNK#': 2503}
+\end{verbatim}
+
+The following is a sample output sequence that has been tokenized:
+\begin{verbatim}
+# input: 'rt #AT# #PUNC# encore #PUNC# #AT# for ... #PUNC#'
+[ 0,  1,  2,  3,  2,  1,  4,  ...,  2]
+\end{verbatim}
+
+\subsubsection{One-hot encoding}
+Once each word has been converted into a corresponding integer, each integer is then converted into a vector via one-hot encoding.\\
+
+Let $\mathcal{V}$ be the set of all words in the training vocabulary, including \lstinline{#UNK#}. Then, one-hot encoding maps each input to a vector, $f: \mathbb{R} \rightarrow \mathbb{R}^{|\mathcal{V}|}$.
+	$$ f(n)_i = \left\{\begin{matrix}
+	1, \; \text{if } i=n\\ 
+	0, \; \text{otherwise}
+	\end{matrix}\right. $$
+
+\subsection{\emph{word2vec}}
+\emph{word2vec} is used as a feature extraction method, to convert the sparse one-hot encoding into dense vectors.
+
+\subsubsection{Skip-gram}
+A skip-gram architecture with a window size of $5$ is used for the training of the \emph{word2vec}. This means that given a sequence of words $\bm{x}^{(1)}, \bm{x}^{(2)}, ..., \bm{x}^{(n)}$, for an input variable $\bm{x}^{(i)}$, the target variable $\bm{y}^{(i)} \in \{\bm{x}^{(i-2)}, \bm{x}^{(i-1)}, \bm{x}^{(i+1)}, \bm{x}^{(i+2)}\}$.\\
+
+We initialize two sets of weights, $\bm{W} \in \mathbb{R}^{300 \times |\mathcal{V}|}$ and $\bm{U} \in \mathbb{R}^{|\mathcal{V}| \times 300}$, with each value drawn from a normal distribution $\mathcal{N} \sim (0, 0.1^2)$.\\
+
+\subsubsection{Forward}
+The model is defined as such:
+\begin{equation}
+\begin{split}
+	\bm{x}^{(i)}, \bm{y}^{(i)} &\in \mathbb{R}^{|\mathcal{V}|} \\
+	\bm{h}^{(i)} &= \bm{W} \bm{x}^{(i)} \\
+	\bm{o}^{(i)} &= \bm{U} \bm{h}^{(i)} \\
+ 	\hat{\bm{y}}^{(i)} &= \text{softmax}(\bm{o}^{(i)}) \\
+	\mathcal{L} &= -\sum_{y^{(i)}} \bm{y}^{(i)} \cdot \text{log}(\hat{\bm{y}}^{(i)})
+\end{split}
+\end{equation}
+
+The loss function is the sum of the cross-entropy loss between all target variables in the context, and the predicted variable.
+
+\subsubsection{Backward}
+\begin{equation}
+\begin{split}
+\frac{\partial \mathcal{L}^{(i)}}{\partial \bm{o}^{(i)}}
+	&= \text{softmax}(\bm{o}^{(i)}) - \bm{y}^{(i)} \\
+	&= \hat{\bm{y}}^{(i)} - \bm{y}^{(i)}
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+\frac{\partial \mathcal{L}^{(i)}}{\partial \bm{U}}
+	&= \frac{\partial \mathcal{L}^{(i)}}{\partial \bm{o}^{(i)}} \frac{\partial \bm{o}^{(i)}}{\partial \bm{U}} \\
+	&= (\hat{\bm{y}}^{(i)} - \bm{y}^{(i)}) \bm{h}^{(i)^T}
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+\frac{\partial \mathcal{L}^{(i)}}{\partial \bm{h}^{(i)}}
+	&= \frac{\partial \mathcal{L}^{(i)}}{\partial \bm{o}^{(i)}} \frac{\partial \bm{o}^{(i)}}{\partial \bm{h}^{(i)}} \\
+	&= \bm{U}^T(\hat{\bm{y}}^{(i)} - \bm{y}^{(i)})
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+\frac{\partial \mathcal{L}^{(i)}}{\partial \bm{W}}
+	&= \frac{\partial \mathcal{L}^{(i)}}{\partial \bm{h}^{(i)}} \frac{\partial \bm{h}^{(i)}}{\partial \bm{W}} \\
+	&= \bm{U}^T(\hat{\bm{y}}^{(i)} - \bm{y}^{(i)}) \bm{x}^{(i)^T}
+\end{split}
+\end{equation}
+
+\subsubsection{Training}
+\paragraph{Positive sampling}\mbox{}\\
+For each word in every sentence, we take that word to be the center word. Then, for each word in its context, we update the weights according to the equations above.
+
+\paragraph{Negative sampling}\mbox{}\\
+For each word in every sentence, we take that word to be the center word. We also obtain the context words. Next, we sample 20 words from the vocabulary, excluding the center and context words. The probability of sampling a word $w$ is given by the following equation:
+	$$ P(w) = \frac{\text{Count}(w)^\frac{3}{4}}{\sum_{w'}(\text{Count}(w')^\frac{3}{4})}  $$
+	
+The corresponding loss function for the negative samples is then given by:
+	$$ \mathcal{L} = -\sum_{y^{(i)}} -\bm{y}^{(i)} \cdot \text{log}(\hat{\bm{y}}^{(i)}) $$
+
+\subsubsection{Visualization}
+We use t-SNE to reduce each word vector to 2 dimensions for visualization.\\
+The results are shown in Figure \ref{fig:word2vec}.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=\linewidth]{assets/word2vec.png}
+	\caption{t-SNE visualization of \emph{word2vec} model on EN dataset}
+	\label{fig:word2vec}
+\end{figure}
+
+\subsection{Recurrent neural network (RNN)}
 \subsubsection{Forward}
 We use a RNN, with a computational graph as shown in Figure \ref{fig:rnn}. The RNN maps an input sequence $\bm{x}$ to an output sequence $\bm{o}$. The predicted labels are then given by $\hat{\bm{y}} = \text{softmax}(\bm{o})$.
 
@@ -185,8 +381,8 @@ We use a RNN, with a computational graph as shown in Figure \ref{fig:rnn}. The R
 	\label{fig:rnn}
 \end{figure}
 
-The loss function $L$ compares the predicted labels $\hat{\bm{y}}$ with the target labels $\bm{y}$ through cross-entropy loss, where $C$ is the number of classes in the classification task.
-$$ L = -\sum_i^C \bm{y}_i \cdot \text{log}(\hat{\bm{y}}_i) $$
+The loss function $\mathcal{L}$ compares the predicted labels $\hat{\bm{y}}$ with the target labels $\bm{y}$ through cross-entropy loss, where $C$ is the number of classes in the classification task.
+	$$ \mathcal{L} = -\sum_i^C \bm{y}_i \cdot \text{log}(\hat{\bm{y}}_i) $$
 
 The remaining nodes in the graph are computed as shown in Equation \ref{eqn:forward-all}.
 \begin{equation}
@@ -213,13 +409,13 @@ For an input sequence, $\bm{x}^{(1)}, \bm{x}^{(2)}, ..., \bm{x}^{(n)}$, we first
 \end{equation}
 
 \subsubsection{Backward}
-To perform backpropagation, our objective is to obtain the partial differential of $L$ with respect to the weights and biases. The gradients are taken to be the \textbf{sum} over all time steps $t \in \{1, ..., n\}$.
+To perform backpropagation, our objective is to obtain the partial differential of $\mathcal{L}$ with respect to the weights and biases. The gradients are taken to be the \textbf{sum} over all time steps $t \in \{1, ..., n\}$.
 
 \paragraph{Output layer}
 \begin{equation}
 \label{eqn:backward-o}
 \begin{split}
-	\frac{\partial L}{\partial \bm{o}^{(t)}}
+	\frac{\partial \mathcal{L}^{(t)}}{\partial \bm{o}^{(t)}}
 		&= \text{softmax}(\bm{o}^{(t)}) - \bm{y}^{(t)} \\
 		&= \hat{\bm{y}}^{(t)} - \bm{y}^{(t)}
 \end{split}
@@ -228,8 +424,8 @@ To perform backpropagation, our objective is to obtain the partial differential 
 \begin{equation}
 \label{eqn:backward-c}
 \begin{split}
-	\frac{\partial L}{\partial \bm{c}}
-		&= \sum_{t=1}^n \frac{\partial L}{\partial \bm{o}^{(t)}} \frac{\partial \bm{o}^{(t)}}{\partial \bm{c}} \\
+	\frac{\partial \mathcal{L}}{\partial \bm{c}}
+		&= \sum_{t=1}^n \frac{\partial \mathcal{L}^{(t)}}{\partial \bm{o}^{(t)}} \frac{\partial \bm{o}^{(t)}}{\partial \bm{c}} \\
 		&= \sum_{t=1}^n (\hat{\bm{y}}^{(t)} - \bm{y}^{(t)}) \frac{\partial(\bm{c} + \bm{V}\bm{h}^{(t)})}{\partial \bm{c}} \\
 		&= \sum_{t=1}^n (\hat{\bm{y}}^{(t)} - \bm{y}^{(t)})
 \end{split}
@@ -238,15 +434,15 @@ To perform backpropagation, our objective is to obtain the partial differential 
 \begin{equation}
 \label{eqn:backward-V}
 \begin{split}
-	\frac{\partial L}{\partial \bm{V}}
-		&= \sum_{t=1}^n \frac{\partial L}{\partial \bm{o}^{(t)}} \frac{\partial \bm{o}^{(t)}}{\partial \bm{V}} \\
+	\frac{\partial \mathcal{L}}{\partial \bm{V}}
+		&= \sum_{t=1}^n \frac{\partial \mathcal{L}^{(t)}}{\partial \bm{o}^{(t)}} \frac{\partial \bm{o}^{(t)}}{\partial \bm{V}} \\
 		&= \sum_{t=1}^n (\hat{\bm{y}}^{(t)} - \bm{y}^{(t)}) \frac{\partial(\bm{c} + \bm{V}\bm{h}^{(t)})}{\partial \bm{V}} \\
 		&= \sum_{t=1}^n (\hat{\bm{y}}^{(t)} - \bm{y}^{(t)}) \; \bm{h}^{(t)^T}
 \end{split}
 \end{equation}
 
 \paragraph{Hidden layer}\mbox{}\\
-To compute the gradients of the hidden units $\frac{\partial L}{\partial \bm{h}^{(t)}}$, we initialize the gradient at $t = n$, since it has no subsequent time step, and its gradient is dependent only on $\bm{o}^{(n)}$.
+To compute the gradients of the hidden units $\frac{\partial \mathcal{L}}{\partial \bm{h}^{(t)}}$, we initialize the gradient at $t = n$, since it has no subsequent time step, and its gradient is dependent only on $\bm{o}^{(n)}$.
 
 \begin{figure}[h!]
 \centering
@@ -269,8 +465,8 @@ To compute the gradients of the hidden units $\frac{\partial L}{\partial \bm{h}^
 \begin{equation}
 \label{eqn:backward-hn}
 \begin{split}
-	\frac{\partial L}{\partial \bm{h}^{(n)}}
-		&= \frac{\partial L}{\partial \bm{o}^{(n)}} \frac{\partial \bm{o}^{(n)}}{\partial \bm{h}^{(n)}} \\
+	\frac{\partial \mathcal{L}^{(n)}}{\partial \bm{h}^{(n)}}
+		&= \frac{\partial \mathcal{L}^{(n)}}{\partial \bm{o}^{(n)}} \frac{\partial \bm{o}^{(n)}}{\partial \bm{h}^{(n)}} \\
 		&= (\hat{\bm{y}}^{(n)} - \bm{y}^{(n)}) \frac{\partial(\bm{c} + \bm{V}\bm{h}^{(n)})}{\partial \bm{h}^{(n)}} \\
 		&= \bm{V}^T(\hat{\bm{y}}^{(n)} - \bm{y}^{(n)})
 \end{split}
@@ -306,21 +502,21 @@ Now, we can formulate the rest of the gradients recursively.
 \label{fig:grad-ht}
 \end{figure}
 
-	$$ \frac{\partial L}{\partial \bm{h}^{(t)}}
-		= \frac{\partial L}{\partial \bm{o}^{(t)}} \frac{\partial \bm{o}^{(t)}}{\partial \bm{h}^{(t)}}
-		+ \frac{\partial L}{\partial \bm{h}^{(t+1)}} \frac{\partial \bm{h}^{(t+1)}}{\partial \bm{h}^{(t)}} $$
+	$$ \frac{\partial \mathcal{L}^{(t)}}{\partial \bm{h}^{(t)}}
+		= \frac{\partial \mathcal{L}^{(t)}}{\partial \bm{o}^{(t)}} \frac{\partial \bm{o}^{(t)}}{\partial \bm{h}^{(t)}}
+		+ \frac{\partial \mathcal{L}^{(t+1)}}{\partial \bm{h}^{(t+1)}} \frac{\partial \bm{h}^{(t+1)}}{\partial \bm{h}^{(t)}} $$
 
 From the result in Equation \ref{eqn:backward-hn}, we have that
-	$$ \frac{\partial L}{\partial \bm{o}^{(t)}} \frac{\partial \bm{o}^{(t)}}{\partial \bm{h}^{(t)}}
+	$$ \frac{\partial \mathcal{L}^{(t)}}{\partial \bm{o}^{(t)}} \frac{\partial \bm{o}^{(t)}}{\partial \bm{h}^{(t)}}
 		 = \bm{V}^T(\hat{\bm{y}}^{(t)} - \bm{y}^{(t)}) $$
 
 \begin{equation*}
 \begin{split}
-	\frac{\partial L}{\partial \bm{h}^{(t+1)}} \frac{\partial \bm{h}^{(t+1)}}{\partial \bm{h}^{(t)}}
-		&= \frac{\partial L}{\partial \bm{h}^{(t+1)}} \frac{\partial \bm{h}^{(t+1)}}{\partial \bm{a}^{(t+1)}} \frac{\partial \bm{a}^{(t+1)}}{\partial \bm{h}^{(t)}} \\
-		&= \frac{\partial L}{\partial \bm{h}^{(t+1)}} \frac{\partial( \text{tanh}(\bm{a}^{(t+1)}))}{\partial \bm{a}^{(t+1)}} \frac{\partial (\bm{b} + \bm{U}\bm{x}^{(t+1)} + \bm{W}\bm{h}^{(t)})}{\partial \bm{h}^{(t)}} \\
-		&= \bm{W}^T \frac{\partial L}{\partial \bm{h}^{(t+1)}} \frac{\partial( \text{tanh}(\bm{a}^{(t+1)}))}{\partial \bm{a}^{(t+1)}} \\
-		&= \bm{W}^T \text{diag}(1 - (\bm{h}^{(t+1)})^2) \frac{\partial L}{\partial \bm{h}^{(t+1)}}
+	\frac{\partial \mathcal{L}^{(t+1)}}{\partial \bm{h}^{(t+1)}} \frac{\partial \bm{h}^{(t+1)}}{\partial \bm{h}^{(t)}}
+		&= \frac{\partial \mathcal{L}^{(t+1)}}{\partial \bm{h}^{(t+1)}} \frac{\partial \bm{h}^{(t+1)}}{\partial \bm{a}^{(t+1)}} \frac{\partial \bm{a}^{(t+1)}}{\partial \bm{h}^{(t)}} \\
+		&= \frac{\partial \mathcal{L}^{(t+1)}}{\partial \bm{h}^{(t+1)}} \frac{\partial( \text{tanh}(\bm{a}^{(t+1)}))}{\partial \bm{a}^{(t+1)}} \frac{\partial (\bm{b} + \bm{U}\bm{x}^{(t+1)} + \bm{W}\bm{h}^{(t)})}{\partial \bm{h}^{(t)}} \\
+		&= \bm{W}^T \frac{\partial \mathcal{L}^{(t+1)}}{\partial \bm{h}^{(t+1)}} \frac{\partial( \text{tanh}(\bm{a}^{(t+1)}))}{\partial \bm{a}^{(t+1)}} \\
+		&= \bm{W}^T \text{diag}(1 - (\bm{h}^{(t+1)})^2) \frac{\partial \mathcal{L}^{(t+1)}}{\partial \bm{h}^{(t+1)}}
 \end{split}
 \end{equation*}
 
@@ -328,12 +524,12 @@ Combining the above results, we obtain
 \begin{equation}
 \label{eqn:backward-ht}
 \begin{split}
-	\frac{\partial L}{\partial \bm{h}^{(t)}}
-		&= \frac{\partial L}{\partial \bm{o}^{(t)}} \frac{\partial \bm{o}^{(t)}}{\partial \bm{h}^{(t)}} 
-			+ \frac{\partial L}{\partial \bm{h}^{(t+1)}} \frac{\partial \bm{h}^{(t+1)}}{\partial \bm{h}^{(t)}} \\
-		&= \bm{V}^T(\hat{\bm{y}}^{(t)} - \bm{y}^{(t)}) + \bm{W}^T \text{diag}(1 - (\bm{h}^{(t+1)})^2) \frac{\partial L}{\partial \bm{h}^{(t+1)}}
+	\frac{\partial \mathcal{L}^{(t)}}{\partial \bm{h}^{(t)}}
+		&= \frac{\partial \mathcal{L}^{(t)}}{\partial \bm{o}^{(t)}} \frac{\partial \bm{o}^{(t)}}{\partial \bm{h}^{(t)}} 
+			+ \frac{\partial \mathcal{L}^{(t+1)}}{\partial \bm{h}^{(t+1)}} \frac{\partial \bm{h}^{(t+1)}}{\partial \bm{h}^{(t)}} \\
+		&= \bm{V}^T(\hat{\bm{y}}^{(t)} - \bm{y}^{(t)}) + \bm{W}^T \text{diag}(1 - (\bm{h}^{(t+1)})^2) \frac{\partial \mathcal{L}}{\partial \bm{h}^{(t+1)}}
 \end{split}
-\end{equation}
+\end{equation}\\
 
 It is next imperative to show that the Jacobian $J^{(t+1)} = \frac{\partial \bm{h}^{(t+1)}}{\partial \bm{a}^{(t+1)}} = \frac{\partial( \text{tanh}(\bm{a}^{(t+1)}))}{\partial \bm{a}^{(t+1)}} = \text{diag}(1 - (\bm{h}^{(t+1)})^2)$. \\
 
@@ -357,36 +553,37 @@ For $i = j$,
 		... & ... & 1 - (\bm{h}_i^{(t)})^2 & ... \\ 
 		0 & 0 & ... & 1 - (\bm{h}_n^{(t)})^2
 		\end{pmatrix} 
-		= \text{diag}(1 - (\bm{h}^{(t)})^2) $$
-		
+		= \text{diag}(1 - (\bm{h}^{(t)})^2) $$\\
+
+
 We can then use this result to obtain the gradients with respect to $\bm{b}, \bm{W}, \bm{U}$.
 \begin{equation}
 \label{eqn:backward-b}
 \begin{split}
-	\frac{\partial L}{\partial \bm{b}}
-		&= \sum_{t=1}^{n} \frac{\partial L}{\partial \bm{h}^{(t)}} \frac{\partial \bm{h}^{(t)}}{\partial \bm{a}^{(t)}} \frac{\partial \bm{a}^{(t)}}{\partial \bm{b}} \\
-		&= \sum_{t=1}^{n} \text{diag}(1 - (\bm{h}^{(t)})^2) \frac{\partial L}{\partial \bm{h}^{(t)}} \frac{\partial (\bm{b} + \bm{U}\bm{x}^{(t)} + \bm{W}\bm{h}^{(t-1)})}{\partial \bm{b}} \\
-		&= \sum_{t=1}^{n} \text{diag}(1 - (\bm{h}^{(t)})^2) \frac{\partial L}{\partial \bm{h}^{(t)}}
+	\frac{\partial \mathcal{L}}{\partial \bm{b}}
+		&= \sum_{t=1}^{n} \frac{\partial \mathcal{L}^{(t)}}{\partial \bm{h}^{(t)}} \frac{\partial \bm{h}^{(t)}}{\partial \bm{a}^{(t)}} \frac{\partial \bm{a}^{(t)}}{\partial \bm{b}} \\
+		&= \sum_{t=1}^{n} \text{diag}(1 - (\bm{h}^{(t)})^2) \frac{\partial \mathcal{L}^{(t)}}{\partial \bm{h}^{(t)}} \frac{\partial (\bm{b} + \bm{U}\bm{x}^{(t)} + \bm{W}\bm{h}^{(t-1)})}{\partial \bm{b}} \\
+		&= \sum_{t=1}^{n} \text{diag}(1 - (\bm{h}^{(t)})^2) \frac{\partial \mathcal{L}^{(t)}}{\partial \bm{h}^{(t)}}
 \end{split}
 \end{equation}
 
 \begin{equation}
 \label{eqn:backward-W}
 \begin{split}
-	\frac{\partial L}{\partial \bm{W}}
-		&= \sum_{t=1}^{n} \frac{\partial L}{\partial \bm{h}^{(t)}} \frac{\partial \bm{h}^{(t)}}{\partial \bm{a}^{(t)}} \frac{\partial \bm{a}^{(t)}}{\partial \bm{W}} \\
-		&= \sum_{t=1}^{n} \text{diag}(1 - (\bm{h}^{(t)})^2) \frac{\partial L}{\partial \bm{h}^{(t)}} \frac{\partial (\bm{b} + \bm{U}\bm{x}^{(t)} + \bm{W}\bm{h}^{(t-1)})}{\partial \bm{W}} \\
-		&= \sum_{t=1}^{n} \text{diag}(1 - (\bm{h}^{(t)})^2) \frac{\partial L}{\partial \bm{h}^{(t)}} \bm{h}^{(t-1)^T}
+	\frac{\partial \mathcal{L}}{\partial \bm{W}}
+		&= \sum_{t=1}^{n} \frac{\partial \mathcal{L}^{(t)}}{\partial \bm{h}^{(t)}} \frac{\partial \bm{h}^{(t)}}{\partial \bm{a}^{(t)}} \frac{\partial \bm{a}^{(t)}}{\partial \bm{W}} \\
+		&= \sum_{t=1}^{n} \text{diag}(1 - (\bm{h}^{(t)})^2) \frac{\partial \mathcal{L}^{(t)}}{\partial \bm{h}^{(t)}} \frac{\partial (\bm{b} + \bm{U}\bm{x}^{(t)} + \bm{W}\bm{h}^{(t-1)})}{\partial \bm{W}} \\
+		&= \sum_{t=1}^{n} \text{diag}(1 - (\bm{h}^{(t)})^2) \frac{\partial \mathcal{L}^{(t)}}{\partial \bm{h}^{(t)}} \bm{h}^{(t-1)^T}
 \end{split}
 \end{equation}
 
 \begin{equation}
 \label{eqn:backward-U}
 \begin{split}
-	\frac{\partial L}{\partial \bm{U}}
-		&= \sum_{t=1}^{n} \frac{\partial L}{\partial \bm{h}^{(t)}} \frac{\partial \bm{h}^{(t)}}{\partial \bm{a}^{(t)}} \frac{\partial \bm{a}^{(t)}}{\partial \bm{U}} \\
-		&= \sum_{t=1}^{n} \text{diag}(1 - (\bm{h}^{(t)})^2) \frac{\partial L}{\partial \bm{h}^{(t)}} \frac{\partial (\bm{b} + \bm{U}\bm{x}^{(t)} + \bm{W}\bm{h}^{(t-1)})}{\partial \bm{U}} \\
-		&= \sum_{t=1}^{n} \text{diag}(1 - (\bm{h}^{(t)})^2) \frac{\partial L}{\partial \bm{h}^{(t)}} \bm{x}^{(t)^T}
+	\frac{\partial \mathcal{L}}{\partial \bm{U}}
+		&= \sum_{t=1}^{n} \frac{\partial \mathcal{L}^{(t)}}{\partial \bm{h}^{(t)}} \frac{\partial \bm{h}^{(t)}}{\partial \bm{a}^{(t)}} \frac{\partial \bm{a}^{(t)}}{\partial \bm{U}} \\
+		&= \sum_{t=1}^{n} \text{diag}(1 - (\bm{h}^{(t)})^2) \frac{\partial \mathcal{L}^{(t)}}{\partial \bm{h}^{(t)}} \frac{\partial (\bm{b} + \bm{U}\bm{x}^{(t)} + \bm{W}\bm{h}^{(t-1)})}{\partial \bm{U}} \\
+		&= \sum_{t=1}^{n} \text{diag}(1 - (\bm{h}^{(t)})^2) \frac{\partial \mathcal{L}^{(t)}}{\partial \bm{h}^{(t)}} \bm{x}^{(t)^T}
 \end{split}
 \end{equation}
 
@@ -394,28 +591,74 @@ In summary,
 \begin{equation}
 \label{eqn:backward-all}
 \begin{split}
-	\frac{\partial L}{\partial \bm{U}}
-		&= \sum_{t=1}^{n} \text{diag}(1 - (\bm{h}^{(t)})^2) \frac{\partial L}{\partial \bm{h}^{(t)}} \bm{x}^{(t)^T} \\
-	\frac{\partial L}{\partial \bm{W}}
-		&= \sum_{t=1}^{n} \text{diag}(1 - (\bm{h}^{(t)})^2) \frac{\partial L}{\partial \bm{h}^{(t)}} \bm{h}^{(t-1)^T} \\
-	\frac{\partial L}{\partial \bm{b}}
-		&= \sum_{t=1}^{n} \text{diag}(1 - (\bm{h}^{(t)})^2) \frac{\partial L}{\partial \bm{h}^{(t)}} \\
-	\frac{\partial L}{\partial \bm{V}}
+	\frac{\partial \mathcal{L}}{\partial \bm{U}}
+		&= \sum_{t=1}^{n} \text{diag}(1 - (\bm{h}^{(t)})^2) \frac{\partial \mathcal{L}^{(t)}}{\partial \bm{h}^{(t)}} \bm{x}^{(t)^T} \\
+	\frac{\partial \mathcal{L}}{\partial \bm{W}}
+		&= \sum_{t=1}^{n} \text{diag}(1 - (\bm{h}^{(t)})^2) \frac{\partial \mathcal{L}^{(t)}}{\partial \bm{h}^{(t)}} \bm{h}^{(t-1)^T} \\
+	\frac{\partial \mathcal{L}}{\partial \bm{b}}
+		&= \sum_{t=1}^{n} \text{diag}(1 - (\bm{h}^{(t)})^2) \frac{\partial \mathcal{L}^{(t)}}{\partial \bm{h}^{(t)}} \\
+	\frac{\partial \mathcal{L}}{\partial \bm{V}}
 		&= \sum_{t=1}^{n} (\hat{\bm{y}}^{(t)} - \bm{y}^{(t)}) \; \bm{h}^{(t)^T} \\
-	\frac{\partial L}{\partial \bm{c}}
+	\frac{\partial \mathcal{L}}{\partial \bm{c}}
 		&= \sum_{t=1}^{n} (\hat{\bm{y}}^{(t)} - \bm{y}^{(t)})
 \end{split}
 \end{equation}
 
 \subsubsection{Training}
+\paragraph{Regularization}\mbox{}\\
+We add $L_2$ regularization to the weights $\bm{U}, \bm{W}, \bm{V}$.\\
+This adds an additional term to their gradients, e.g. $\lambda \lVert\bm{U}\rVert_1$, where $\lambda$ is the regularization penalty coefficient.\\
 
+The regularization term helped to deal with the class imbalance in the labels, illustrated in Figure \ref{fig:class-labels}.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.9\linewidth]{assets/class_labels.png}
+	\caption{Distribution of labels in FR dataset}
+	\label{fig:class-labels}
+\end{figure}
+
+\paragraph{Batch updates}\mbox{}\\
+The weight updates were done in batches. $b$ sentences were randomly chosen, where $b$ is a hyperparameter. The gradients of each sentence were first independently obtained. Then, the mean of those gradients were taken and applied to the weights.\\
+
+This helped to smooth the loss decrease over training. We compare the value of the training loss over time before and after implementing batch updates in Figure \ref{fig:batch-updates}.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.45\linewidth]{assets/loss_nobatch.png}
+	\includegraphics[width=0.45\linewidth]{assets/loss_batch.png}
+	\subfloat[Before batch updates]{\hspace{0.5\linewidth}}
+	\subfloat[After batch updates]{\hspace{0.5\linewidth}}
+	\caption{Training loss against epochs}
+	\label{fig:batch-updates}	
+\end{figure}
+
+\paragraph{Class weighting}\mbox{}\\
+The class imbalance as illustrated in Figure \ref{fig:class-labels} caused the model to over-predict a particular class, resulting in very recall.\\
+
+In order to correct the class imbalance, the gradient function was modified to include class weights $w$:
+	$$ \frac{\partial \mathcal{L}^{(t)}}{\partial \bm{o}^{(t)}}
+		= \hat{\bm{y}}^{(t)} - \bm{y}^{(t)} \circ w $$
+
+However, by introducing class weights, it was found that the precision of the results drastically worsened. As such, class weighting was not used.
 
 \subsubsection{Evaluation}
+Inference was done using the same forward pass of the RNN to obtain $\hat{\bm{y}}$.\\
 
+However, words that are not found in the training vocabulary cannot be directly converted via \emph{word2vec}. Instead, the context words of the center word are taken and converted to one-hot labels. Then, the mean of the one-hot labels is taken to be the representative "one-hot encoding" of the center word, and the \emph{word2vec} vector is obtained. This allows unknown words to be represented by their context.
 
-\subsubsection{Finetuning}
+\subsection{Results}
+Our results on the EN and FR datasets are as follows:
 
-
-\subsubsection{Summary}
+\begin{table}[htpb]
+	\centering
+	\begin{tabular}{|l|c|c|}
+		\hline
+		\multirow{2}{*}{\textbf{Dataset}} & \multicolumn{2}{c|}{\textbf{F-Score}} \\ \cline{2-3} 
+		& \multicolumn{1}{l|}{\textbf{Entity}} & \multicolumn{1}{l|}{\textbf{\begin{tabular}[c]{@{}l@{}}Entity\\ Type\end{tabular}}} \\ \hline
+		EN & TBD & TBD \\ \hline
+		FR & TBD & TBD \\ \hline
+	\end{tabular}
+\end{table}
 
 \end{document}
