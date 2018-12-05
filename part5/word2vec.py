@@ -137,7 +137,7 @@ def word2vec(W, U, sentence):
     
 
 if __name__ == '__main__':
-    dataset = 'EN'
+    dataset = 'FR'
     filename = f'../data/{dataset}/train'
     W, U = train_word2vec(filename)
 
