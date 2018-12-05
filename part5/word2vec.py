@@ -118,8 +118,8 @@ def save_model(W, U, root_dir):
     
     
 def load_model(root_dir):
-    W = np.load(join(root_dir, 'W.npy'))
-    U = np.load(join(root_dir, 'U.npy'))
+    W = np.load(join(root_dir, 'W_new.npy'))
+    U = np.load(join(root_dir, 'U_new.npy'))
     return W, U
     
     
