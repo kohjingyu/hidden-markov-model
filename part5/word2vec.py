@@ -5,9 +5,25 @@ from tqdm import tqdm, trange
 
 from file_io import parse, read_file
 from preprocess import get_token_mapping, tokenize
-from utils import softmax, one_hot_encode
 
 lr = 1e-4
+
+
+def softmax(x):
+    """
+    Computes softmax on a vector of shape (n, 1)
+    """
+    e_x = np.exp(x - np.max(x))
+    return e_x / e_x.sum(axis=0)
+
+
+def one_hot_encode(n, depth):
+    """
+    Return one-hot encoded vector of shape (depth, 1)
+    """
+    a = np.zeros([depth, 1])
+    a[n, 0] = 1
+    return a
 
 
 def prepare_inputs(token_mapping, sentences):
@@ -121,19 +137,6 @@ def train_word2vec(filename, n_epochs=1):
     for i in trange(n_epochs, desc='Training word2vec'):
         W, U = train_epoch(i, W, U, X, observations, token_mapping)
     return W, U
-
-
-def word2vec(W, U, sentence):
-    """
-    Perform model inference given trained word2vec weights.
-    
-    Arguments:
-        sentence - Array of one-hot vectors of shape [n_words, vocab_size, 1]
-    """
-    weights = 0.5 * (W + U.T)  # [300, n_tokens]
-    sentence = np.squeeze(sentence, axis=2)  # [n_words, n_tokens]
-    inference = sentence.dot(weights.T)  # [n_words, 300]
-    return np.expand_dims(inference, axis=-1)  # [n_words, 300, 1]
     
 
 if __name__ == '__main__':

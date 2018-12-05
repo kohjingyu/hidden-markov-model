@@ -1,6 +1,5 @@
 import numpy as np
 import re
-from utils import one_hot_encode
 
 re_punc = r'^[^a-zA-Z0-9]+$'
 re_hash = r'^#'
