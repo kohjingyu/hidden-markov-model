@@ -141,7 +141,7 @@ def train_word2vec(filename, n_epochs=1):
 
 if __name__ == '__main__':
     dataset = 'FR'
-    filename = f'../data/{dataset}/train'
+    filename = '../data/{}/train'.format(dataset)
     W, U = train_word2vec(filename)
 
-    save_model(W, U, f'weights/word2vec/{dataset}')
+    save_model(W, U, 'weights/word2vec/{}'.format(dataset))

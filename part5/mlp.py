@@ -158,7 +158,7 @@ def train(model, X_train, y_train, X_val, state_mapping, val_sentences, n_epochs
     
     n_iters = len(X_train) // batch_size
     for i in trange(n_epochs, desc='Training MLP'):
-        for j in trange(n_iters, desc=f'Epoch {i+1}', leave=False):
+        for j in trange(n_iters, desc='Epoch {}'.format(i+1), leave=False):
             idx = np.random.choice(np.arange(len(X_train)), size=batch_size)
             x, y = X_train[idx], y_train[idx]
             loss, grad = backward(*model, x=x, y=y)
@@ -240,11 +240,11 @@ if __name__ == '__main__':
     
     dataset = args.dataset
     
-    train_filename = f'../data/{dataset}/train'
-    val_filename = f'../data/{dataset}/dev.out'
-    out_filename = f'../data/{dataset}/dev.p5.out'
+    train_filename = '../data/{}/train'.format(dataset)
+    val_filename = '../data/{}/dev.out'.format(dataset)
+    out_filename = '../data/{}/dev.p5.out'.format(dataset)
     
-    word2vec_dir = f'weights/word2vec/{dataset}'
+    word2vec_dir = 'weights/word2vec/{}'.format(dataset)
     w2v_W, w2v_U = load_word2vec(word2vec_dir)
     
     main()
