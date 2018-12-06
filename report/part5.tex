@@ -13,6 +13,7 @@
 \usepackage{listings}
 \usepackage{tikz}
 \usepackage{pgf}
+\usepackage{url}
 
 \usepackage{booktabs,multirow}
 \usetikzlibrary{arrows, automata}
@@ -365,7 +366,7 @@ The loss function is the sum of the cross-entropy loss between all target variab
 For each word in every sentence, we take that word to be the center word. Then, for each word in its context, we update the weights according to the equations above.
 
 \paragraph{Negative sampling}\mbox{}\\
-For each word in every sentence, we take that word to be the center word. We also obtain the context words. Next, we sample 20 words from the vocabulary, excluding the center and context words. The probability of sampling a word $w$ is given by the following equation:
+For each word in every sentence, we take that word to be the center word. We also obtain the context words. Next, we sample 20 words from the vocabulary, excluding the center and context words, as recommended for small datasets \cite{DBLP:journals/corr/MikolovSCCD13}. The probability of sampling a word $w$ is given by the following equation, to reduce the probability of oversampling frequent words:
 	$$ P(w) = \frac{\text{Count}(w)^\frac{3}{4}}{\sum_{w'}(\text{Count}(w')^\frac{3}{4})}  $$
 	
 The corresponding loss function for the negative samples is then given by:
@@ -383,7 +384,7 @@ The results are shown in Figure \ref{fig:word2vec}.
 \end{figure}
 
 \subsubsection{Inference}
-During inference, both weights $\bm{W}, \bm{U}$ are combined via averaging.
+During inference, both weights $\bm{W}, \bm{U}$ are combined via averaging \cite{pennington2014glove}.
 	$$ \bm{h} = \frac{1}{2}(\bm{W} + \bm{U}^T) \bm{x} $$
 
 It is also common to find words in the validation and test sets that are not found in the training set. As such, these words are not in the \emph{word2vec} vocabulary. \\
@@ -398,7 +399,7 @@ We use a RNN, with a computational graph as shown in Figure \ref{fig:rnn}. The R
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=0.7\linewidth]{assets/rnn.png}
-	\caption{RNN}
+	\caption{RNN model architecture \cite{Goodfellow-et-al-2016}}
 	\label{fig:rnn}
 \end{figure}
 
@@ -850,7 +851,7 @@ In order to determine the optimal hyperparameters for this task, we perform a gr
     \caption{Hyperparameter Selection}
 \end{table}
 
-After performing the above search, we selected the best results based on the validation set. These were consistent for both the FR and EN dataset, with the optimal parameters being a batch size of $32$, learning rate of $1e-2$, learning rate decay of $1.0$ (no decay), and hidden dimension of $512$. The results for this model is presented in Table \ref{table:mlpresults}
+After performing the above search, we selected the best results based on the validation set. These were consistent for both the FR and EN dataset, with the optimal parameters being a batch size of $32$, learning rate of $1e-2$, learning rate decay of $1.0$ (no decay), and hidden dimension of $512$. The results for this model is presented in Table \ref{table:mlpresults}.
 
 \subsection{Results}
 We compare the results on the EN and FR datasets between the RNN and MLP method.
@@ -870,7 +871,7 @@ We compare the results on the EN and FR datasets between the RNN and MLP method.
 \end{table}
 
 \subsubsection{MLP}
-\begin{table}[htpb] \label{table:mlpresults}
+\begin{table}[htpb] 
 	\centering
 	\begin{tabular}{|l|c|c|}
 		\hline
@@ -880,12 +881,18 @@ We compare the results on the EN and FR datasets between the RNN and MLP method.
 		FR & 0.677 & 0.467 \\ \hline
 	\end{tabular}
     \caption{MLP Results}
+    \label{table:mlpresults}
 \end{table}
 
 \subsection{Evaluation}
 
-In general, we see that the MLP performs significantly  better than the RNN on all metrics. This is likely due to the vanishing gradients problem of the RNN, as some of the sentences may be quite long. Additionally, the FR dataset is quite poorly labeled, with most of the words being designated a label of "O". This may point to the downsides of a sequence based model, which may overfit to the the poor structure in the sentences. We attribute the performance gain of the MLP for this task due to its high fitting power. With a hidden dimension size of $512$ neurons, it is able to fit the training set very well. \\
+In general, we see that the MLP performs significantly  better than the RNN on all metrics. This is likely due to the vanishing gradients problem of the RNN, as some of the sentences may be quite long. Additionally, the FR dataset is quite poorly labeled, with most of the words being designated a label of "O". This may point to the downsides of a sequence based model, which may overfit to the poor structure in the sentences. We attribute the performance gain of the MLP for this task due to its high fitting power. With a hidden dimension size of $512$ neurons, it is able to fit the training set very well. \\
 
 To counter overfitting, we initially tried several regularization techniques such as dropout and weight decay. However, this did not have a noticeable improvement on the validation score. We think this may be due to the training and validation set having similar data distributions. Hence, our model is able to generalize well to the validation set.
+
+
+\newpage
+\bibliographystyle{ieeetr}
+\bibliography{bibliography}
 
 \end{document}
