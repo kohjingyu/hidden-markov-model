@@ -1,0 +1,18 @@
+\begin{thebibliography}{1}
+
+\bibitem{DBLP:journals/corr/MikolovSCCD13}
+T.~Mikolov, I.~Sutskever, K.~Chen, G.~Corrado, and J.~Dean, ``Distributed
+  representations of words and phrases and their compositionality,'' {\em
+  CoRR}, vol.~abs/1310.4546, 2013.
+
+\bibitem{pennington2014glove}
+J.~Pennington, R.~Socher, and C.~D. Manning, ``Glove: Global vectors for word
+  representation,'' in {\em Empirical Methods in Natural Language Processing
+  (EMNLP)}, pp.~1532--1543, 2014.
+
+\bibitem{Goodfellow-et-al-2016}
+I.~Goodfellow, Y.~Bengio, and A.~Courville, {\em Deep Learning}.
+\newblock MIT Press, 2016.
+\newblock \url{http://www.deeplearningbook.org}.
+
+\end{thebibliography}
