@@ -74,34 +74,35 @@ def backward(W, U, x, y):
     return loss, grad
     
     
-def train_sentence(W, U, sentence, observations, token_mapping):
+def train_sentence(W, U, sentence):
     for i in range(len(sentence)):
         # python allows indexing beyond len(list), but not before
         if i <= 2:
             context = np.concatenate([sentence[:i], sentence[i+1:i+3]])
         else:
             context = np.concatenate([sentence[i-2:i], sentence[i+1:i+3]])
+        # positive sampling
+        center_word = sentence[i]
+        loss, (dW, dU) = backward(W, U, center_word, np.sum(context, axis=0))
+        W -= lr * dW
+        U -= lr * dU
         # create probabilities for negative samples
         word_counts = np.asarray(list(observations.values()))
         word_probs = np.power(word_counts, 0.75) / np.sum(np.power(word_counts, 0.75))
-        # positive sampling
-        center_word = sentence[i]
+        # remove probability of context word being negatively sampled
         for context_word in context:
-            _, (dW, dU) = backward(W, U, center_word, context_word)  # center as input, context as target
-            W -= lr * dW
-            U -= lr * dU
-            # remove probability of context word being negatively sampled
             word_probs[np.where(context_word.flatten())] = 0
         # negative sampling
         word_probs /= np.sum(word_probs)  # normalize to 1
+        # sample indices of 20 words
         negative_idx = np.random.choice(np.arange(len(word_probs)), size=20, p=word_probs)
-        for idx in negative_idx:
-            depth = len(token_mapping)
-            negative_word = one_hot_encode(idx, depth) * -1
-            _, (dW, dU) = backward(W, U, center_word, negative_word)  # center as input, context as target
-            W -= lr * dW
-            U -= lr * dU
-    return W, U
+        # create a size-20 one-hot window
+        neg_context = np.zeros([20, len(token_mapping), 1])
+        for i, idx in enumerate(negative_idx):
+            neg_context[i, idx, 0] = 0
+        loss, (dW, dU) = backward(W, U, center_word, -np.sum(neg_context, axis=0))
+        W -= lr * dW
+        U -= lr * dU
 
 
 def train_epoch(i, W, U, X, observations, token_mapping):
