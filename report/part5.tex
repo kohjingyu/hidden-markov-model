@@ -32,11 +32,21 @@
 }
 \setlength{\parindent}{0pt}
 
+\title{01.112 Project}
+\author{Gabriel Wong (1002299)
+\and Lee Tze How (1002033) \and Koh Jing Yu (1002045)}
 
 \begin{document}
-\pagenumbering{gobble}
-\setcounter{section}{1}
+\maketitle
+\begin{abstract}
+In this report, we document our code for the 01.112 project, as well as detail our experiments and approach for the design challenge. We use a multi-layer perceptron to achieve an entity F-score of 0.700 on EN and 0.677 on FR for the validation dataset.
+\end{abstract}
 
+\tableofcontents
+\pagebreak
+
+% \pagenumbering{gobble}
+\setcounter{section}{1}
 
 \section{Maximum Likelihood Estimation}
 Our code for Part 2 is within the files \textit{Part2.py} and \textit{Part2.ipynb}.
@@ -295,7 +305,7 @@ Let $\mathcal{V}$ be the set of all words in the training vocabulary, including 
 	0, \; \text{otherwise}
 	\end{matrix}\right. $$
 
-\subsection{\emph{word2vec}}
+\subsection{word2vec}
 \emph{word2vec} is used as a feature extraction method, to convert the sparse one-hot encoding into dense vectors.
 
 \subsubsection{Skip-gram}
@@ -826,6 +836,21 @@ However, by introducing class weights, it was found that the precision of the re
 
 \subsubsection{Hyperparameter optimization}
 
+In order to determine the optimal hyperparameters for this task, we perform a grid search. We enumerate over the following hyperparameters and the possible values:
+\begin{table}[htpb]
+    \centering
+    \begin{tabular}{|l|c|}
+        \hline
+        Hyperparameter & Possible Values \\ \hline
+        Batch Size & [8, 16, 32, 50, 64] \\ \hline
+        Learning Rate & [1e-2, 1e-3, 1e-4] \\ \hline
+        Learning Rate Decay & [1.0, 0.95, 0.9] \\ \hline
+        Hidden Dimension & [32, 64, 128, 256, 512] \\ \hline
+    \end{tabular}
+    \caption{Hyperparameter Selection}
+\end{table}
+
+After performing the above search, we selected the best results based on the validation set. These were consistent for both the FR and EN dataset, with the optimal parameters being a batch size of $32$, learning rate of $1e-2$, learning rate decay of $1.0$ (no decay), and hidden dimension of $512$. The results for this model is presented in Table \ref{table:mlpresults}
 
 \subsection{Results}
 We compare the results on the EN and FR datasets between the RNN and MLP method.
@@ -840,18 +865,27 @@ We compare the results on the EN and FR datasets between the RNN and MLP method.
 		EN & 0.572 & 0.268 \\ \hline
 		FR & 0.136 & 0.094 \\ \hline
 	\end{tabular}
+
+    \caption{RNN Results}
 \end{table}
 
 \subsubsection{MLP}
-\begin{table}[htpb]
+\begin{table}[htpb] \label{table:mlpresults}
 	\centering
 	\begin{tabular}{|l|c|c|}
 		\hline
 		\multirow{2}{*}{\textbf{Dataset}} & \multicolumn{2}{c|}{\textbf{F-Score}} \\ \cline{2-3} 
 		& \multicolumn{1}{l|}{\textbf{Entity}} & \multicolumn{1}{l|}{\textbf{\begin{tabular}[c]{@{}l@{}}Entity\\ Type\end{tabular}}} \\ \hline
-		EN & TBD & TBD \\ \hline
-		FR & TBD & TBD \\ \hline
+		EN & 0.700 & 0.614 \\ \hline
+		FR & 0.677 & 0.467 \\ \hline
 	\end{tabular}
+    \caption{MLP Results}
 \end{table}
+
+\subsection{Evaluation}
+
+In general, we see that the MLP performs significantly  better than the RNN on all metrics. This is likely due to the vanishing gradients problem of the RNN, as some of the sentences may be quite long. Additionally, the FR dataset is quite poorly labeled, with most of the words being designated a label of "O". This may point to the downsides of a sequence based model, which may overfit to the the poor structure in the sentences. We attribute the performance gain of the MLP for this task due to its high fitting power. With a hidden dimension size of $512$ neurons, it is able to fit the training set very well. \\
+
+To counter overfitting, we initially tried several regularization techniques such as dropout and weight decay. However, this did not have a noticeable improvement on the validation score. We think this may be due to the training and validation set having similar data distributions. Hence, our model is able to generalize well to the validation set.
 
 \end{document}
