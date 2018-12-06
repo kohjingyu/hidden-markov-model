@@ -5,7 +5,7 @@ from tqdm import tqdm, trange
 from word2vec import load_model as load_word2vec
 from file_io import parse, read_file
 from preprocess import get_token_mapping, tokenize
-from evaluate import get_scores
+from evaluate import get_scores, write_predictions
 
 def one_hot_encode(n, depth):
     a = np.zeros([depth])
@@ -147,7 +147,7 @@ def predict(state_mapping, probs):
     return [states[int(i)] for i in indices]  # map indices back to states
 
 
-def train(model, X_train, y_train, X_val, state_mapping, val_sentences, n_epochs, batch_size):
+def train(model, X_train, y_train, X_val, X_test, state_mapping, val_sentences, test_sentences, n_epochs, batch_size):
     global lr  # changing lr for decay requires global write
 
     checkpoints = []  # store model weights after every epoch
@@ -173,9 +173,16 @@ def train(model, X_train, y_train, X_val, state_mapping, val_sentences, n_epochs
             
         # validate
         results = []  # get and store predictions
-        for i in trange(len(X_val), desc='Validation', leave=False):
-            y_pred = predict(state_mapping, forward(*model, x=X_val[i]))
+        for j in trange(len(X_val), desc='Validation', leave=False):
+            y_pred = predict(state_mapping, forward(*model, x=X_val[j]))
             results.append(y_pred)
+
+        test_results = []  # get and store predictions
+        for j in trange(len(X_test), desc='Validation', leave=False):
+            y_pred = predict(state_mapping, forward(*model, x=X_test[j]))
+            test_results.append(y_pred)
+
+        write_predictions(test_results, test_sentences, test_out_filename+".{}".format(i))
 
         lr *= decay
         scores.append(get_scores(results, val_sentences, out_filename, val_filename))
@@ -189,6 +196,7 @@ def main():
     train_sentences, train_labels = read_file(train_filename)
 
     val_sentences, val_labels = read_file(val_filename)
+    test_sentences, original_sentences, test_labels = read_file(test_filename, test=True)
 
     # preprocess
     token_mapping = get_token_mapping(observations)
@@ -199,6 +207,8 @@ def main():
 
     X_val = prepare_inputs(token_mapping, w2v_W, w2v_U, val_sentences)
     y_val = prepare_labels(state_mapping, val_labels)
+
+    X_test = prepare_inputs(token_mapping, w2v_W, w2v_U, test_sentences)
 
     # train model
     model = init_vars(input_size=300, output_size=len(state_mapping), n_hidden=n_hidden)
@@ -211,12 +221,17 @@ def main():
         y_flat.extend(sentence)
     y_flat = np.asarray(y_flat)
 
-    checkpoints, losses, scores = train(model, X_flat, y_flat, X_val, state_mapping, val_sentences, n_epochs, batch_size)
+    checkpoints, losses, scores = train(model, X_flat, y_flat, X_val, X_test, state_mapping, val_sentences, original_sentences, n_epochs, batch_size)
     
     f_entity = [tup[0][-1] for tup in scores]
     f_type = [tup[1][-1] for tup in scores]
     print('Entity:', (np.argmax(f_entity), np.max(f_entity)))
+    print(f_entity)
     print('Entity type:', (np.argmax(f_type), np.max(f_type)))
+    print(f_type)
+    averaged = (np.array(f_type) + np.array(f_entity)) / 2
+    print("Average:", (np.argmax(averaged), np.max(averaged)))
+    print(averaged)
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Dank MLP trainer')
@@ -242,6 +257,8 @@ if __name__ == '__main__':
     train_filename = '../data/{}/train'.format(dataset)
     val_filename = '../data/{}/dev.out'.format(dataset)
     out_filename = '../data/{}/dev.p5.out'.format(dataset)
+    test_filename = '../data/{}/test.in'.format(dataset)
+    test_out_filename = '../data/{}/test.p5.out'.format(dataset)
     
     word2vec_dir = 'weights/word2vec/{}'.format(dataset)
     w2v_W, w2v_U = load_word2vec(word2vec_dir)

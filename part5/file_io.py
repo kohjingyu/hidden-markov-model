@@ -27,7 +27,7 @@ def parse(train_filename):
     return observations, states
 
 
-def read_file(filename, clean=True):
+def read_file(filename, clean=True, test=False):
     """
     Reads a file and returns the sentence and corresponding labels in it.
     
@@ -42,11 +42,19 @@ def read_file(filename, clean=True):
     with open(filename, 'r', encoding="utf-8") as f:
         lines = f.readlines()
         
-    sentence, label = [], []
+    # Write original sentences instead of cleaned sentences for test data
+    sentence, original_sentence, label = [], [], []
     sentences, labels = [], []
+    original_sentences = []
     for line in lines:
         data_split = line.strip().rsplit(' ', 1)
-        if len(data_split) == 2:
+        if test and len(data_split) == 1 and data_split[0] != '':
+            word = data_split[0]
+            original_sentence.append(word)
+            if clean:
+                word = clean_word(word)
+            sentence.append(word)
+        elif len(data_split) == 2:
             word, state = data_split
             if clean:
                 word = clean_word(word)
@@ -54,7 +62,13 @@ def read_file(filename, clean=True):
             label.append(state)
         else:
             sentences.append(sentence)
+            original_sentences.append(original_sentence)
             labels.append(label)
             sentence = []
+            original_sentence = []
             label = []
-    return sentences, labels
+
+    if test:
+        return sentences, original_sentences, labels
+    else:
+        return sentences, labels

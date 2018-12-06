@@ -74,3 +74,4 @@ def get_scores(results, val_sentences, out_filename, val_filename):
     observed = get_observed(open(val_filename, 'r'))
     predicted = get_predicted(open(out_filename, 'r'))
     return compare(observed, predicted)
+
