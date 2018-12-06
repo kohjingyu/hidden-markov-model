@@ -14,7 +14,7 @@ def parse(train_filename):
         observations - Dictionary containing all words and corresponding counts
         states - Dictionary containing all labels and corresponding counts
     """
-    with open(train_filename, 'r') as f:
+    with open(train_filename, 'r', encoding="utf-8") as f:
         lines = f.readlines()
 
     observations, states = defaultdict(int), defaultdict(int)
@@ -39,7 +39,7 @@ def read_file(filename, clean=True):
         sentences - List of sentences in file, where each sentence is a list of words
         labels - List of list of labels in file, corresponding to sentences
     """
-    with open(filename, 'r') as f:
+    with open(filename, 'r', encoding="utf-8") as f:
         lines = f.readlines()
         
     sentence, label = [], []

@@ -8,7 +8,6 @@ from preprocess import get_token_mapping, tokenize
 
 lr = 1e-4
 
-
 def softmax(x):
     """
     Computes softmax on a vector of shape (n, 1)

@@ -7,7 +7,6 @@ from file_io import parse, read_file
 from preprocess import get_token_mapping, tokenize
 from evaluate import get_scores
 
-
 def one_hot_encode(n, depth):
     a = np.zeros([depth])
     a[n] = 1
