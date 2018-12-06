@@ -824,9 +824,25 @@ where $\circ$ is the element-wise multiplication between the two vectors.\\
 
 However, by introducing class weights, it was found that the precision of the results drastically worsened. As such, class weighting was not used.
 
-\subsection{Results}
-Our results on the EN and FR datasets are as follows:
+\subsubsection{Hyperparameter optimization}
 
+
+\subsection{Results}
+We compare the results on the EN and FR datasets between the RNN and MLP method.
+
+\subsubsection{RNN}
+\begin{table}[htpb]
+	\centering
+	\begin{tabular}{|l|c|c|}
+		\hline
+		\multirow{2}{*}{\textbf{Dataset}} & \multicolumn{2}{c|}{\textbf{F-Score}} \\ \cline{2-3} 
+		& \multicolumn{1}{l|}{\textbf{Entity}} & \multicolumn{1}{l|}{\textbf{\begin{tabular}[c]{@{}l@{}}Entity\\ Type\end{tabular}}} \\ \hline
+		EN & 0.572 & 0.268 \\ \hline
+		FR & 0.136 & 0.094 \\ \hline
+	\end{tabular}
+\end{table}
+
+\subsubsection{MLP}
 \begin{table}[htpb]
 	\centering
 	\begin{tabular}{|l|c|c|}
