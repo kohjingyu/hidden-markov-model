@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2018.10.13)  3 DEC 2018 22:15
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2018.10.13)  6 DEC 2018 14:11
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -576,18 +576,18 @@ File: pgflibraryshapes.multipart.code.tex 2010/01/07 v3.0.1a (rcs-revision 1.2)
 ))) (./part5.aux)
 \openout1 = `part5.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 34.
-LaTeX Font Info:    ... okay on input line 34.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 34.
-LaTeX Font Info:    ... okay on input line 34.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 34.
-LaTeX Font Info:    ... okay on input line 34.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 34.
-LaTeX Font Info:    ... okay on input line 34.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 34.
-LaTeX Font Info:    ... okay on input line 34.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 34.
-LaTeX Font Info:    ... okay on input line 34.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 36.
+LaTeX Font Info:    ... okay on input line 36.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -695,30 +695,30 @@ Package caption Info: End \AtBeginDocument code.
 \c@lstlisting=\count150
 
 ABD: EveryShipout initializing macros
-LaTeX Font Info:    Try loading font information for OT1+pcr on input line 47.
+LaTeX Font Info:    Try loading font information for OT1+pcr on input line 49.
 
 (/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1pcr.fd
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 )
 Missing character: There is no Ã in font pcrr7t!
 Missing character: There is no © in font pcrr7t!
-LaTeX Font Info:    Try loading font information for U+msa on input line 58.
+LaTeX Font Info:    Try loading font information for U+msa on input line 60.
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 58.
+LaTeX Font Info:    Try loading font information for U+msb on input line 60.
 
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-Overfull \hbox (58.24498pt too wide) in paragraph at lines 94--94
+Overfull \hbox (58.24498pt too wide) in paragraph at lines 96--96
 []    \OT1/pcr/m/n/10 ''' Returns the MLE of the emission parameters based on t
 he emissions dictionary '''[] 
  []
 
 
-Overfull \hbox (10.24498pt too wide) in paragraph at lines 127--127
+Overfull \hbox (10.24498pt too wide) in paragraph at lines 129--129
 []    \OT1/pcr/m/n/10 ''' Takes a list `sentence` that contains words of a sent
 ence as strings '''[] 
  []
@@ -726,38 +726,33 @@ ence as strings '''[]
 [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
-Overfull \hbox (28.24498pt too wide) in paragraph at lines 127--127
+Overfull \hbox (28.24498pt too wide) in paragraph at lines 129--129
 []                \OT1/pcr/m/n/10 prob = get_emission_parameters(emissions, emi
 ssion_counts, word, y)[] 
  []
 
 [2]
-Underfull \hbox (badness 10000) in paragraph at lines 175--176
+Underfull \hbox (badness 10000) in paragraph at lines 177--178
 
  []
 
 [3]
-Underfull \hbox (badness 10000) in paragraph at lines 246--247
+Underfull \hbox (badness 10000) in paragraph at lines 248--249
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 258--259
+Underfull \hbox (badness 10000) in paragraph at lines 260--261
 
  []
 
 [4]
-Underfull \hbox (badness 10000) in paragraph at lines 267--268
+Underfull \hbox (badness 10000) in paragraph at lines 269--270
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 288--289
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 300--301
+Underfull \hbox (badness 10000) in paragraph at lines 290--291
 
  []
 
@@ -766,122 +761,137 @@ Underfull \hbox (badness 10000) in paragraph at lines 302--303
 
  []
 
+
+Underfull \hbox (badness 10000) in paragraph at lines 304--305
+
+ []
+
 [5]
 <assets/word2vec.png, id=35, 931.48pt x 904.37875pt>
 File: assets/word2vec.png Graphic file (type png)
 <use assets/word2vec.png>
-Package pdftex.def Info: assets/word2vec.png  used on input line 368.
-(pdftex.def)             Requested size: 469.75502pt x 456.07979pt.
+Package pdftex.def Info: assets/word2vec.png  used on input line 370.
+(pdftex.def)             Requested size: 422.77664pt x 410.4718pt.
 
 
-LaTeX Warning: `!h' float specifier changed to `!ht'.
+LaTeX Warning: `h' float specifier changed to `ht'.
 
-<assets/rnn.png, id=37, 942.52126pt x 693.59125pt>
-File: assets/rnn.png Graphic file (type png)
-<use assets/rnn.png>
-Package pdftex.def Info: assets/rnn.png  used on input line 379.
-(pdftex.def)             Requested size: 328.82707pt x 241.9774pt.
 [6]
+Underfull \hbox (badness 10000) in paragraph at lines 379--380
 
-LaTeX Warning: `!h' float specifier changed to `!ht'.
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 386--387
+
+ []
 
 [7 <./assets/word2vec.png>]
-Underfull \hbox (badness 10000) in paragraph at lines 398--399
+<assets/rnn.png, id=48, 942.52126pt x 693.59125pt>
+File: assets/rnn.png Graphic file (type png)
+<use assets/rnn.png>
+Package pdftex.def Info: assets/rnn.png  used on input line 390.
+(pdftex.def)             Requested size: 328.82707pt x 241.9774pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 409--410
 
  []
 
-[8 <./assets/rnn.png>]
-
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-[9]
-Underfull \hbox (badness 10000) in paragraph at lines 532--533
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 534--535
+[8 <./assets/rnn.png>] [9]
+Underfull \hbox (badness 10000) in paragraph at lines 543--544
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 556--557
+Underfull \hbox (badness 10000) in paragraph at lines 545--546
 
  []
 
 [10]
-Underfull \hbox (badness 10000) in paragraph at lines 608--611
-
- []
-
-<assets/class_labels.png, id=61, 1163.34625pt x 319.1925pt>
-File: assets/class_labels.png Graphic file (type png)
-<use assets/class_labels.png>
-Package pdftex.def Info: assets/class_labels.png  used on input line 616.
-(pdftex.def)             Requested size: 422.77664pt x 116.00018pt.
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 621--623
+Underfull \hbox (badness 10000) in paragraph at lines 567--568
 
  []
 
 [11]
-<assets/loss_nobatch.png, id=65, 1161.33875pt x 577.15625pt>
+Underfull \hbox (badness 10000) in paragraph at lines 620--621
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 642--643
+
+ []
+
+[12] [13]
+Underfull \hbox (badness 10000) in paragraph at lines 769--770
+
+ []
+
+<assets/loss_nobatch.png, id=72, 1161.33875pt x 577.15625pt>
 File: assets/loss_nobatch.png Graphic file (type png)
 <use assets/loss_nobatch.png>
-Package pdftex.def Info: assets/loss_nobatch.png  used on input line 628.
+Package pdftex.def Info: assets/loss_nobatch.png  used on input line 775.
 (pdftex.def)             Requested size: 211.38832pt x 105.05492pt.
-<assets/loss_batch.png, id=66, 1161.33875pt x 577.15625pt>
+<assets/loss_batch.png, id=73, 1161.33875pt x 577.15625pt>
 File: assets/loss_batch.png Graphic file (type png)
 <use assets/loss_batch.png>
-Package pdftex.def Info: assets/loss_batch.png  used on input line 629.
+Package pdftex.def Info: assets/loss_batch.png  used on input line 776.
 (pdftex.def)             Requested size: 211.38832pt x 105.05492pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 636--638
+Underfull \hbox (badness 10000) in paragraph at lines 805--807
+
+ []
+
+[14 <./assets/loss_nobatch.png> <./assets/loss_batch.png>]
+<assets/class_labels.png, id=80, 1163.34625pt x 319.1925pt>
+File: assets/class_labels.png Graphic file (type png)
+<use assets/class_labels.png>
+Package pdftex.def Info: assets/class_labels.png  used on input line 812.
+(pdftex.def)             Requested size: 422.77664pt x 116.00018pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 818--819
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 646--647
+Underfull \hbox (badness 10000) in paragraph at lines 822--824
 
  []
 
-[12 <./assets/class_labels.png> <./assets/loss_nobatch.png> <./assets/loss_batc
-h.png>] [13] (./part5.aux) ) 
+[15 <./assets/class_labels.png>] (./part5.aux) ) 
 Here is how much of TeX's memory you used:
- 16859 strings out of 494923
- 333389 string characters out of 6180741
- 388117 words of memory out of 5000000
- 19853 multiletter control sequences out of 15000+600000
+ 16890 strings out of 494923
+ 333740 string characters out of 6180741
+ 388168 words of memory out of 5000000
+ 19884 multiletter control sequences out of 15000+600000
  11257 words of font info for 42 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 55i,18n,76p,443b,980s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/share/texlive/texmf-dist/fonts/enc/dvips/base
-/8r.enc}</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pf
-b></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></us
-r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbxti10.pfb></usr/sh
-are/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/te
-xlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/
-texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texlive/texmf-d
-ist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/texmf-dist/fon
-ts/type1/public/amsfonts/cm/cmmib10.pfb></usr/share/texlive/texmf-dist/fonts/ty
-pe1/public/amsfonts/cmextra/cmmib7.pfb></usr/share/texlive/texmf-dist/fonts/typ
-e1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/publ
-ic/amsfonts/cm/cmr5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfo
-nts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/c
-mr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pf
-b></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr
-/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/
-texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texliv
-e/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></usr/share/texlive
-/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texlive/
-texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb>
-Output written on part5.pdf (13 pages, 584873 bytes).
+ 55i,21n,76p,424b,980s stack positions out of 5000i,500n,10000p,200000b,80000s
+{/usr/share/texlive/texmf-dist/
+fonts/enc/dvips/base/8r.enc}</usr/share/texlive/texmf-dist/fonts/type1/public/a
+msfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfont
+s/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/c
+mbx7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbxti10
+.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb><
+/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/s
+hare/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share/te
+xlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texlive/t
+exmf-dist/fonts/type1/public/amsfonts/cm/cmmib10.pfb></usr/share/texlive/texmf-
+dist/fonts/type1/public/amsfonts/cmextra/cmmib7.pfb></usr/share/texlive/texmf-d
+ist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fon
+ts/type1/public/amsfonts/cm/cmr5.pfb></usr/share/texlive/texmf-dist/fonts/type1
+/public/amsfonts/cm/cmr7.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
+amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts
+/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cm
+sy5.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb
+></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr
+/share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></usr/
+share/texlive/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/s
+hare/texlive/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb>
+Output written on part5.pdf (15 pages, 600622 bytes).
 PDF statistics:
- 142 PDF objects out of 1000 (max. 8388607)
- 96 compressed objects within 1 object stream
+ 153 PDF objects out of 1000 (max. 8388607)
+ 103 compressed objects within 2 object streams
  0 named destinations out of 1000 (max. 500000)
  38 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -20,6 +20,8 @@
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
 
+\numberwithin{equation}{section}
+
 \setlist[description]{leftmargin=\parindent,labelindent=\parindent}
 \setlist[itemize,enumerate]{align=left}
 \lstset{
@@ -365,14 +367,23 @@ The results are shown in Figure \ref{fig:word2vec}.
 
 \begin{figure}[h]
 	\centering
-	\includegraphics[width=\linewidth]{assets/word2vec.png}
+	\includegraphics[width=0.9\linewidth]{assets/word2vec.png}
 	\caption{t-SNE visualization of \emph{word2vec} model on EN dataset}
 	\label{fig:word2vec}
 \end{figure}
 
+\subsubsection{Inference}
+During inference, both weights $\bm{W}, \bm{U}$ are combined via averaging.
+	$$ \bm{h} = \frac{1}{2}(\bm{W} + \bm{U}^T) \bm{x} $$
+
+It is also common to find words in the validation and test sets that are not found in the training set. As such, these words are not in the \emph{word2vec} vocabulary. \\
+
+Instead of simply treating these words as an \lstinline{#UNK#} token, they were represented as the mean of their context, within a window of size 5.
+	$$ x_i = \frac{1}{4}(x_{i-2} + x_{i-1} + x_{i+1} + x_{i+2}) $$
+
 \subsection{Recurrent neural network (RNN)}
 \subsubsection{Forward}
-We use a RNN, with a computational graph as shown in Figure \ref{fig:rnn}. The RNN maps an input sequence $\bm{x}$ to an output sequence $\bm{o}$. The predicted labels are then given by $\hat{\bm{y}} = \text{softmax}(\bm{o})$.
+We use a RNN, with a computational graph as shown in Figure \ref{fig:rnn}. The RNN maps an input sequence $\bm{x}$ to an output sequence $\bm{o}$. The predicted labels are then given by $\hat{\bm{y}} = \text{softmax}(\bm{o})$.\\
 
 \begin{figure}[h!]
 	\centering
@@ -587,7 +598,7 @@ We can then use this result to obtain the gradients with respect to $\bm{b}, \bm
 \end{split}
 \end{equation}
 
-In summary,
+\paragraph{Summary}
 \begin{equation}
 \label{eqn:backward-all}
 \begin{split}
@@ -604,21 +615,157 @@ In summary,
 \end{split}
 \end{equation}
 
-\subsubsection{Training}
-\paragraph{Regularization}\mbox{}\\
-We add $L_2$ regularization to the weights $\bm{U}, \bm{W}, \bm{V}$.\\
-This adds an additional term to their gradients, e.g. $\lambda \lVert\bm{U}\rVert_1$, where $\lambda$ is the regularization penalty coefficient.\\
+\subsection{Multilayer perceptron (MLP)}
+\subsubsection{Forward}
+We first define the computational graph for a 2-layer MLP, our architecture of choice.\\
 
-The regularization term helped to deal with the class imbalance in the labels, illustrated in Figure \ref{fig:class-labels}.
-
-\begin{figure}[h]
+\begin{figure}[h!]
 	\centering
-	\includegraphics[width=0.9\linewidth]{assets/class_labels.png}
-	\caption{Distribution of labels in FR dataset}
-	\label{fig:class-labels}
+	\begin{tikzpicture}[>=stealth, auto, node distance=2.5cm, semithick]
+	\tikzstyle{every state}=[draw=black, thick, fill=white, minimum size=1.25cm]
+	
+	\node[state] (x) {$\bm{x}$};
+	\node[state] (h1) [right of=x] {$\bm{h_1}$};
+	\node[state] (h2) [right of=h1] {$\bm{h_2}$};
+	\node[state] (o)  [right of=h2] {$\bm{o}$};
+	\node[state] (y) [right of=o, node distance=3cm] {$\hat{\bm{y}}$};
+	
+	\path[->] (x) edge node {$\bm{W}$} (h1);
+	\path[->] (h1) edge node {$\bm{V}$} (h2);
+	\path[->] (h2) edge node {$\bm{U}$} (o);
+	\path[->] (o) edge node {softmax} (y);
+	\end{tikzpicture}
+	\caption{MLP computational graph}
+	\label{fig:mlp}
 \end{figure}
+	
+Similar to the RNN, the input is defined by $\bm{x}$, the predicted label $\hat{\bm{y}}$, and the target labels $\bm{y}$. The loss function $\mathcal{L}$ is again the cross-entropy loss.\\
 
-\paragraph{Batch updates}\mbox{}\\
+The rest of the graph is defined as such:
+\begin{equation}
+\begin{split}
+	\bm{a}_1 &= \bm{W}\bm{x} + \bm{b} \\
+	\bm{h}_1 &= \text{ReLU}(\bm{a}_1) \\
+	\bm{a}_2 &= \bm{V}\bm{h}_1 + \bm{c} \\
+	\bm{h}_2 &= \text{ReLU}(\bm{a}_1) \\
+	\bm{o} &= \bm{U}\bm{h}_2 + \bm{d} \\
+	\hat{\bm{y}} &= \text{softmax}(\bm{o})
+\end{split}
+\end{equation}
+
+\subsubsection{Backward}
+The equations for backpropagation of the MLP are defined similar to the RNN.
+
+\paragraph{Output layer}
+\begin{equation}
+\begin{split}
+	\frac{\partial\mathcal{L}}{\partial\bm{o}}
+		&= \text{softmax}(\bm{o} - \bm{y}) \\
+		&= \hat{\bm{y}} - \bm{y}
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+	\frac{\partial\mathcal{L}}{\partial\bm{d}}
+		&=	\frac{\partial\mathcal{L}}{\partial\bm{o}} \frac{\partial\bm{o}}{\partial\bm{d}} \\
+		&= \frac{\partial\mathcal{L}}{\partial\bm{o}}
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+\frac{\partial\mathcal{L}}{\partial\bm{U}}
+	&=	\frac{\partial\mathcal{L}}{\partial\bm{o}} \frac{\partial\bm{o}}{\partial\bm{U}} \\
+	&= \frac{\partial\mathcal{L}}{\partial\bm{o}} \;\bm{h}_2^T
+\end{split}
+\end{equation}
+
+\paragraph{Second hidden layer}
+\begin{equation}
+\begin{split}
+	\frac{\partial\mathcal{L}}{\partial\bm{h}_2}
+		&= \frac{\partial\mathcal{L}}{\partial\bm{o}} \frac{\partial\bm{o}}{\partial\bm{h}_2} \\
+		&= \bm{U}^T\; \frac{\partial\mathcal{L}}{\partial\bm{o}}
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+	\frac{\partial\mathcal{L}}{\partial\bm{a}_2}
+		&= \frac{\partial\mathcal{L}}{\partial\bm{h}_2} \frac{\partial\bm{h}_2}{\partial\bm{a}_2} \\
+	\left(\frac{\partial\bm{h}_2}{\partial\bm{a}_2}\right)_i 
+		&= \left\{\begin{matrix}
+			1, (\bm{a}_2)_i \geq 0 \\ 
+			0, (\bm{a}_2)_i < 0
+			\end{matrix}\right.
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+	\frac{\partial\mathcal{L}}{\partial\bm{c}}
+		&= \frac{\partial\mathcal{L}}{\partial\bm{a}_2} \frac{\partial\bm{a}_2}{\partial\bm{c}} \\
+		&= \frac{\partial\mathcal{L}}{\partial\bm{a}_2}
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+	\frac{\partial\mathcal{L}}{\partial\bm{V}}
+		&= \frac{\partial\mathcal{L}}{\partial\bm{a}_2} \frac{\partial\bm{a}_2}{\partial\bm{V}} \\
+		&= \frac{\partial\mathcal{L}}{\partial\bm{a}_2} \;\bm{h}_1^T
+\end{split}
+\end{equation}
+
+\paragraph{First hidden layer}
+\begin{equation}
+\begin{split}
+	\frac{\partial\mathcal{L}}{\partial\bm{h}_1}
+		&= \frac{\partial\mathcal{L}}{\partial\bm{a}_2} \frac{\partial\bm{a}_2}{\partial\bm{h}_1} \\
+		&= \bm{V}^T\; \frac{\partial\mathcal{L}}{\partial\bm{a}_2}
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+	\frac{\partial\mathcal{L}}{\partial\bm{a}_1}
+		&= \frac{\partial\mathcal{L}}{\partial\bm{h}_1} \frac{\partial\bm{h}_1}{\partial\bm{a}_1} \\
+	\left(\frac{\partial\bm{h}_1}{\partial\bm{a}_1}\right)_i 
+		&= \left\{\begin{matrix}
+			1, (\bm{a}_1)_i \geq 0 \\ 
+			0, (\bm{a}_1)_i < 0
+			\end{matrix}\right.
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+	\frac{\partial\mathcal{L}}{\partial\bm{b}}
+		&= \frac{\partial\mathcal{L}}{\partial\bm{a}_1} \frac{\partial\bm{a}_1}{\partial\bm{b}} \\
+		&= \frac{\partial\mathcal{L}}{\partial\bm{a}_1}
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+	\frac{\partial\mathcal{L}}{\partial\bm{W}}
+		&= \frac{\partial\mathcal{L}}{\partial\bm{a}_1} \frac{\partial\bm{a}_1}{\partial\bm{W}} \\
+		&= \frac{\partial\mathcal{L}}{\partial\bm{a}_1} \;\bm{x}^T
+\end{split}
+\end{equation}
+
+\subsection{Training}
+\subsubsection{Weight initialization}
+All weights were initialized with values sampled from a Gaussian distribution $\mathcal{N} \sim \{0, 0.1^2\}$.\\
+All biases were initialized with a constant value $0.1$.
+
+\begin{verbatim}
+    W = np.random.normal(0, 0.1, size=[300, 128])
+    b = np.ones(shape=[1, 128]) * 0.1
+\end{verbatim}
+
+\subsubsection{Batch updates}
 The weight updates were done in batches. $b$ sentences were randomly chosen, where $b$ is a hyperparameter. The gradients of each sentence were first independently obtained. Then, the mean of those gradients were taken and applied to the weights.\\
 
 This helped to smooth the loss decrease over training. We compare the value of the training loss over time before and after implementing batch updates in Figure \ref{fig:batch-updates}.
@@ -633,19 +780,49 @@ This helped to smooth the loss decrease over training. We compare the value of t
 	\label{fig:batch-updates}	
 \end{figure}
 
-\paragraph{Class weighting}\mbox{}\\
+\subsubsection{Optimizers}
+\paragraph{Stochastic gradient descent}\mbox{}\\
+SGD was the initial choice of optimizer due to its ease of implementation. However, it was shown to perform poorly on class imbalance without strong regularization.
+
+\paragraph{Adagrad}\mbox{}\\
+Adagrad was then used in place of SGD. This yielded highly favourable results.
+
+\begin{verbatim}
+    cum_grad = [np.zeros_like(weight) for weight in model]
+    for i in range(n):
+        loss, grad = backward(*model, x=x, y=y)
+
+        # gradient accumulation
+        for cum_weight, weight_update in zip(cum_grad, grad):
+            cum_weight += np.square(weight_update)
+
+        # gradient update
+        for weight, cum_weight, weight_update in zip(model, cum_grad, grad):
+            weight -= (lr / (np.sqrt(cum_weight) + 1e-6)) * weight_update
+\end{verbatim}
+
+\subsubsection{Regularization}
+We add $L_2$ regularization to the weights $\bm{U}, \bm{W}, \bm{V}$.\\
+This adds an additional term to their gradients, e.g. $\lambda \lVert\bm{U}\rVert_1$, where $\lambda$ is the regularization penalty coefficient.\\
+
+The regularization term helped to deal with the class imbalance in the labels during training of the RNN. The class imbalance is illustrated in Figure \ref{fig:class-labels}.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.9\linewidth]{assets/class_labels.png}
+	\caption{Distribution of labels in FR dataset}
+	\label{fig:class-labels}
+\end{figure}
+
+\subsubsection{Class weighting}
 The class imbalance as illustrated in Figure \ref{fig:class-labels} caused the model to over-predict a particular class, resulting in very recall.\\
 
 In order to correct the class imbalance, the gradient function was modified to include class weights $w$:
 	$$ \frac{\partial \mathcal{L}^{(t)}}{\partial \bm{o}^{(t)}}
-		= \hat{\bm{y}}^{(t)} - \bm{y}^{(t)} \circ w $$
+		= (\hat{\bm{y}}^{(t)} - \bm{y}^{(t)}) \circ w $$
+where $\circ$ is the element-wise multiplication between the two vectors.\\
 
 However, by introducing class weights, it was found that the precision of the results drastically worsened. As such, class weighting was not used.
-
-\subsubsection{Evaluation}
-Inference was done using the same forward pass of the RNN to obtain $\hat{\bm{y}}$.\\
-
-However, words that are not found in the training vocabulary cannot be directly converted via \emph{word2vec}. Instead, the context words of the center word are taken and converted to one-hot labels. Then, the mean of the one-hot labels is taken to be the representative "one-hot encoding" of the center word, and the \emph{word2vec} vector is obtained. This allows unknown words to be represented by their context.
 
 \subsection{Results}
 Our results on the EN and FR datasets are as follows:
