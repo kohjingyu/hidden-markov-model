@@ -94,14 +94,14 @@ def get_emission_parameters(emissions, emission_counts, x, y, k=1):
     ''' Returns the MLE of the emission parameters based on the emissions dictionary '''
     state_data = emissions[y]
     count_y = emission_counts[y] #sum(state_data.values()) # Denominator
-    
+
     # If x == "#UNK#", it will return the following
     count_y_x = k
-    
+
     # If x exists in training, return its MLE instead
     if x != "#UNK#":
         count_y_x = state_data[x] # Numerator
-    
+
     e = count_y_x / (count_y + k)
     return e{}
 \end{verbatim}
@@ -114,20 +114,20 @@ For sequence labeling, we implement a function that takes as input the sentence 
 def label_sequence(sentence, emissions, emission_counts):
     ''' Takes a list `sentence` that contains words of a sentence as strings '''
     tags = []
-    
+
     for word in sentence:
         predicted_label = ""
         max_prob = -1
-        
+
         # Find y with maximum probability
         for y in emissions:
-            
+
             if word not in observations:
                 word = "#UNK#"
-            
+
             if (word in emissions[y]) or (word == "#UNK#"):
                 prob = get_emission_parameters(emissions, emission_counts, word, y)
-            
+
                 # If this is higher than the previous highest, use this
                 if prob > max_prob:
                     predicted_label = y
@@ -135,7 +135,7 @@ def label_sequence(sentence, emissions, emission_counts):
 
         # Add prediction to list
         tags.append(predicted_label)
-    
+
     return tags
 \end{verbatim}
 
@@ -149,7 +149,7 @@ Our results on the four datasets are as follows:
 \centering
 \begin{tabular}{|l|c|c|}
 \hline
-\multirow{2}{*}{\textbf{Dataset}} & \multicolumn{2}{c|}{\textbf{F-Score}} \\ \cline{2-3} 
+\multirow{2}{*}{\textbf{Dataset}} & \multicolumn{2}{c|}{\textbf{F-Score}} \\ \cline{2-3}
  & \multicolumn{1}{l|}{\textbf{Entity}} & \multicolumn{1}{l|}{\textbf{\begin{tabular}[c]{@{}l@{}}Entity\\ Type\end{tabular}}} \\ \hline
 EN & 0.6297 & 0.4595 \\ \hline
 SG & 0.2952 & 0.1501 \\ \hline
@@ -158,6 +158,7 @@ FR & 0.2751 & 0.1169 \\ \hline
 \end{tabular}
 \end{table}
 
+\newpage
 \section{First-Order Hidden Markov Model}
 \subsection{Transition Parameters Emission}
 In order to derive the transition values, we process the file as follow.\\
@@ -199,10 +200,10 @@ We begin by initializing $\pi(0, \text{\lstinline{START}}) = 1$.
 \subsubsection{Recursion}
 Next, as per the Viterbi algorithm:
 	$$ \pi(j, v) = \max_{u\in\mathcal{T}} \{ \pi(j-1, u) \cdot a_{u, v} \cdot b_v(x_j) \}, \: \forall\; v \in \mathcal{T} $$
-	
+
 In addition, we also use the backpointer table to store the state transition $(y_{j-1}, y_j)$:
 	$$\beta(j, v) = \argmax_{u\in\mathcal{T}} \{ \pi(j-1, u) \cdot a_{u, v} \cdot b_v(x_j) \}, \: \forall\; v \in \mathcal{T} $$
-	
+
 \begin{verbatim}
 x_j = obs_seq[j-1]
 for v in states:  # current state
@@ -238,7 +239,7 @@ Our results on the four datasets are as follows:
 	\centering
 	\begin{tabular}{|l|c|c|}
 		\hline
-		\multirow{2}{*}{\textbf{Dataset}} & \multicolumn{2}{c|}{\textbf{F-Score}} \\ \cline{2-3} 
+		\multirow{2}{*}{\textbf{Dataset}} & \multicolumn{2}{c|}{\textbf{F-Score}} \\ \cline{2-3}
 		& \multicolumn{1}{l|}{\textbf{Entity}} & \multicolumn{1}{l|}{\textbf{\begin{tabular}[c]{@{}l@{}}Entity\\ Type\end{tabular}}} \\ \hline
 		EN & 0.6379 & 0.5556 \\ \hline
 		SG & 0.4185 & 0.2531 \\ \hline
@@ -247,8 +248,131 @@ Our results on the four datasets are as follows:
 	\end{tabular}
 \end{table}
 
+\newpage
 \section{Second-Order Hidden Markov Model}
+The Second Order Hidden Markov Model works on a similar principle to the First Order, except now we also want to consider the \textit{prior} state in addition to the current state during our expectation maximization. Our Viterbi algorithm is thus a modified version of the algorithm discussed in \ref{sec:viterbi}.\\
 
+\subsection{Emissions Matrix Training}
+Our emissions matrix is trained identically to that in section \ref{sec:emissions}, with emissions mapped to the current state via Maximum Likelihood Estimation (MLE).
+
+\subsection{Transition Matrix Training}
+Our transition matrix training process is now a modified version of that of the initial process. As ours is now a second order Hidden Markov Model, we now need to map the likelihood of \textit{sequence pairs} leading to output states for our transition matrix.\\
+
+Mathematically, our previous state, current state, and next state are represented by $t, u, v$ respectively. Our modified matrices are hence:
+
+$$ a_{t, u, v} = q(v | t, u) = \frac{\text{\lstinline{Count}}(t, u, v)}{\text{\lstinline{Count}}(t, u)} $$
+$$ b_u(x_j) = e(x | y) = \frac{\text{\lstinline{Count}}(u \rightarrow x_j)}{\text{\lstinline{Count}}(u)} $$
+
+Our Python implementation for the modified training of the transition matrix is as follows:
+
+\begin{verbatim}
+for line in lines:
+		# data_split is a 2-element list, in the structure [{word}, {state}].
+    data_split = line.strip().rsplit(' ', 1)
+
+    # line breaks -> new sequence
+    if len(data_split) < 2:
+        transitions[(prev_prev_state, prev_state, 'STOP')] += 1
+        prev_prev_state = 'PRESTART'
+        prev_state = 'START'
+        continue
+
+    # Get state transitioned to
+    obs, curr_state = data_split
+    transitions[(prev_prev_state, prev_state, curr_state)] += 1
+
+    # Update past-2-states history
+    prev_prev_state = prev_state
+    prev_state = curr_state
+\end{verbatim}
+
+\subsection{Modified Viterbi Algorithm}
+
+Our Viterbi algorithm is also now modified to accommodate this two-element transition source. Both the probability and backpointer tables now have a state pair as the index, and $n$ columns where $n$ is the number of words in the sentence being evaluated.
+
+\subsubsection{Initialization}
+We begin by initializing $\pi(PRESTART,START,0) = 1$.
+Similar to the original Viterbi algorithm, we have:
+- A matrix, P, which serves as our probability table
+- A matrix, B, which serves as our backpointer table
+
+Both matrices have an index being the total possible unique combinations of our states.
+
+\begin{verbatim}
+	P.loc[('PRESTART','START'),0] = 1
+\end{verbatim}
+
+\subsubsection{Recursion}
+Next, as per the Viterbi algorithm:
+	$$ \pi(j, v) = \max_{t, u\in\mathcal{T}} \{ \pi(j-1, t, u) \cdot a_{t, u, v} \cdot b_v(x_j) \}, \: \forall\; v \in \mathcal{T} $$
+
+In addition, we also use the backpointer table to store the state transition $(y_{j-1}, y_j)$:
+	$$\beta(j, v) = \argmax_{t, u\in\mathcal{T}} \{ \pi(j-1, u, v) \cdot a_{t, u, v} \cdot b_v(x_j) \}, \: \forall\; v \in \mathcal{T} $$
+
+\begin{verbatim}
+for j in range(1, n-1):
+		x = clean_word(obs_seq[j-1])
+		if x not in dictionary:
+				x = "#UNK#"
+		for v in states:  # curr state
+				for u in states:  # parent
+						for t in states: # grandparent
+								p = P.loc[(t, u), j-1] * a(t, u, v) * b(v, x)
+								if p > P.loc[(u, v), j]:
+										P.loc[(u, v), j] = p  # update probability
+										B.loc[(u, v), j] = t  # update backpointer - t is the grandfather
+\end{verbatim}
+
+This operation is repeated for $j = \{1, ..., n\}$.
+
+\subsubsection{Termination}
+At the end of the sentence, we perform one termination iteration, where the last state is $STOP$.
+
+\begin{verbatim}
+j = n - 1
+  v = 'STOP'
+  for u in states: # parent state
+      for t in states: # grandparent state
+          p = P.loc[(t, u), j-1] * a(t, u, v)
+          if p > P.loc[(u, v), j]:
+              P.loc[(u, v), j] = p  # probability
+              B.loc[(u, v), j] = t  # backpointer
+\end{verbatim}
+
+\subsubsection{Backtracing}
+After our Probability and Backpointer tables have been fully populated, we generate our predicted state sequence by accessing parent states via the backtracing table.
+
+\begin{verbatim}
+state_pair = P[n-1].idxmax()
+    state_seq = []
+    for i in range(n-1, 0, -1):
+        next_state = B.loc[state_pair, i]
+        # next_state might be numpy.nan or 0 if not populated
+        # in which case predictions fail; return 0s
+        if isinstance(next_state, str):
+            state_seq.append(state_pair[1])
+            state_pair = (next_state, state_pair[0])
+        else: # edge case: no possible transition to START
+            for j in range(int(i)):
+                state_seq.append(('O'))
+            break
+    state_seq = state_seq[::-1][:-1]  # reverse and drop STOP
+\end{verbatim}
+
+\subsection{Results}
+Our results on the EN and FR datasets are as follows:
+\begin{table}[htpb]
+\centering
+\begin{tabular}{|l|c|c|}
+\hline
+\multirow{2}{*}{\textbf{Dataset}} & \multicolumn{2}{c|}{\textbf{F-Score}} \\ \cline{2-3}
+ & \multicolumn{1}{l|}{\textbf{Entity}} & \multicolumn{1}{l|}{\textbf{\begin{tabular}[c]{@{}l@{}}Entity\\ Type\end{tabular}}} \\ \hline
+EN & 0.5619 & 0.3977 \\ \hline
+FR & 0.5238 & 0.3254 \\ \hline
+\end{tabular}
+\end{table}
+
+\newpage
 
 \section{Design Challenge}
 \subsection{Preprocessing}
@@ -302,7 +426,7 @@ Once each word has been converted into a corresponding integer, each integer is 
 
 Let $\mathcal{V}$ be the set of all words in the training vocabulary, including \lstinline{#UNK#}. Then, one-hot encoding maps each input to a vector, $f: \mathbb{R} \rightarrow \mathbb{R}^{|\mathcal{V}|}$.
 	$$ f(n)_i = \left\{\begin{matrix}
-	1, \; \text{if } i=n\\ 
+	1, \; \text{if } i=n\\
 	0, \; \text{otherwise}
 	\end{matrix}\right. $$
 
@@ -368,7 +492,7 @@ For each word in every sentence, we take that word to be the center word. Then, 
 \paragraph{Negative sampling}\mbox{}\\
 For each word in every sentence, we take that word to be the center word. We also obtain the context words. Next, we sample 20 words from the vocabulary, excluding the center and context words, as recommended for small datasets \cite{DBLP:journals/corr/MikolovSCCD13}. The probability of sampling a word $w$ is given by the following equation, to reduce the probability of oversampling frequent words:
 	$$ P(w) = \frac{\text{Count}(w)^\frac{3}{4}}{\sum_{w'}(\text{Count}(w')^\frac{3}{4})}  $$
-	
+
 The corresponding loss function for the negative samples is then given by:
 	$$ \mathcal{L} = -\sum_{y^{(i)}} -\bm{y}^{(i)} \cdot \text{log}(\hat{\bm{y}}^{(i)}) $$
 
@@ -547,7 +671,7 @@ Combining the above results, we obtain
 \label{eqn:backward-ht}
 \begin{split}
 	\frac{\partial \mathcal{L}^{(t)}}{\partial \bm{h}^{(t)}}
-		&= \frac{\partial \mathcal{L}^{(t)}}{\partial \bm{o}^{(t)}} \frac{\partial \bm{o}^{(t)}}{\partial \bm{h}^{(t)}} 
+		&= \frac{\partial \mathcal{L}^{(t)}}{\partial \bm{o}^{(t)}} \frac{\partial \bm{o}^{(t)}}{\partial \bm{h}^{(t)}}
 			+ \frac{\partial \mathcal{L}^{(t+1)}}{\partial \bm{h}^{(t+1)}} \frac{\partial \bm{h}^{(t+1)}}{\partial \bm{h}^{(t)}} \\
 		&= \bm{V}^T(\hat{\bm{y}}^{(t)} - \bm{y}^{(t)}) + \bm{W}^T \text{diag}(1 - (\bm{h}^{(t+1)})^2) \frac{\partial \mathcal{L}}{\partial \bm{h}^{(t+1)}}
 \end{split}
@@ -561,7 +685,7 @@ For $i \ne j$, $J^{(t)}_{ij} = 0$. \\
 For $i = j$,
 \begin{equation*}
 \begin{split}
-	J^{(t+1)}_{ii} = \frac{\partial \bm{h}^{(t+1)}_i}{\partial \bm{a}^{(t+1)}_i} 
+	J^{(t+1)}_{ii} = \frac{\partial \bm{h}^{(t+1)}_i}{\partial \bm{a}^{(t+1)}_i}
 		&= \frac{\partial( \text{tanh}(\bm{a}^{(t+1)})_i)}{\partial \bm{a}^{(t+1)}_i} \\
 		&= 1 - \text{tanh}^2 (\bm{a}^{(t+1)})_i \\
 		&= 1 - (\bm{h}^{(t+1)}_i)^2
@@ -570,11 +694,11 @@ For $i = j$,
 
 	$$ \therefore J^{(t)} = \frac{\partial \bm{h}^{(t)}}{\partial \bm{a}^{(t)}} =
 		\begin{pmatrix}
-		1 - (\bm{h}_1^{(t)})^2 & 0 & ... & 0 \\ 
-		0 & 1 - (\bm{h}_2^{(t)})^2 & ... & 0 \\ 
-		... & ... & 1 - (\bm{h}_i^{(t)})^2 & ... \\ 
+		1 - (\bm{h}_1^{(t)})^2 & 0 & ... & 0 \\
+		0 & 1 - (\bm{h}_2^{(t)})^2 & ... & 0 \\
+		... & ... & 1 - (\bm{h}_i^{(t)})^2 & ... \\
 		0 & 0 & ... & 1 - (\bm{h}_n^{(t)})^2
-		\end{pmatrix} 
+		\end{pmatrix}
 		= \text{diag}(1 - (\bm{h}^{(t)})^2) $$\\
 
 
@@ -634,13 +758,13 @@ We first define the computational graph for a 2-layer MLP, our architecture of c
 	\centering
 	\begin{tikzpicture}[>=stealth, auto, node distance=2.5cm, semithick]
 	\tikzstyle{every state}=[draw=black, thick, fill=white, minimum size=1.25cm]
-	
+
 	\node[state] (x) {$\bm{x}$};
 	\node[state] (h1) [right of=x] {$\bm{h_1}$};
 	\node[state] (h2) [right of=h1] {$\bm{h_2}$};
 	\node[state] (o)  [right of=h2] {$\bm{o}$};
 	\node[state] (y) [right of=o, node distance=3cm] {$\hat{\bm{y}}$};
-	
+
 	\path[->] (x) edge node {$\bm{W}$} (h1);
 	\path[->] (h1) edge node {$\bm{V}$} (h2);
 	\path[->] (h2) edge node {$\bm{U}$} (o);
@@ -649,7 +773,7 @@ We first define the computational graph for a 2-layer MLP, our architecture of c
 	\caption{MLP computational graph}
 	\label{fig:mlp}
 \end{figure}
-	
+
 Similar to the RNN, the input is defined by $\bm{x}$, the predicted label $\hat{\bm{y}}$, and the target labels $\bm{y}$. The loss function $\mathcal{L}$ is again the cross-entropy loss.\\
 
 The rest of the graph is defined as such:
@@ -705,9 +829,9 @@ The equations for backpropagation of the MLP are defined similar to the RNN.
 \begin{split}
 	\frac{\partial\mathcal{L}}{\partial\bm{a}_2}
 		&= \frac{\partial\mathcal{L}}{\partial\bm{h}_2} \frac{\partial\bm{h}_2}{\partial\bm{a}_2} \\
-	\left(\frac{\partial\bm{h}_2}{\partial\bm{a}_2}\right)_i 
+	\left(\frac{\partial\bm{h}_2}{\partial\bm{a}_2}\right)_i
 		&= \left\{\begin{matrix}
-			1, (\bm{a}_2)_i \geq 0 \\ 
+			1, (\bm{a}_2)_i \geq 0 \\
 			0, (\bm{a}_2)_i < 0
 			\end{matrix}\right.
 \end{split}
@@ -742,9 +866,9 @@ The equations for backpropagation of the MLP are defined similar to the RNN.
 \begin{split}
 	\frac{\partial\mathcal{L}}{\partial\bm{a}_1}
 		&= \frac{\partial\mathcal{L}}{\partial\bm{h}_1} \frac{\partial\bm{h}_1}{\partial\bm{a}_1} \\
-	\left(\frac{\partial\bm{h}_1}{\partial\bm{a}_1}\right)_i 
+	\left(\frac{\partial\bm{h}_1}{\partial\bm{a}_1}\right)_i
 		&= \left\{\begin{matrix}
-			1, (\bm{a}_1)_i \geq 0 \\ 
+			1, (\bm{a}_1)_i \geq 0 \\
 			0, (\bm{a}_1)_i < 0
 			\end{matrix}\right.
 \end{split}
@@ -788,7 +912,7 @@ This helped to smooth the loss decrease over training. We compare the value of t
 	\subfloat[Before batch updates]{\hspace{0.5\linewidth}}
 	\subfloat[After batch updates]{\hspace{0.5\linewidth}}
 	\caption{Training loss against epochs}
-	\label{fig:batch-updates}	
+	\label{fig:batch-updates}
 \end{figure}
 
 \subsubsection{Optimizers}
@@ -861,7 +985,7 @@ We compare the results on the EN and FR datasets between the RNN and MLP method.
 	\centering
 	\begin{tabular}{|l|c|c|}
 		\hline
-		\multirow{2}{*}{\textbf{Dataset}} & \multicolumn{2}{c|}{\textbf{F-Score}} \\ \cline{2-3} 
+		\multirow{2}{*}{\textbf{Dataset}} & \multicolumn{2}{c|}{\textbf{F-Score}} \\ \cline{2-3}
 		& \multicolumn{1}{l|}{\textbf{Entity}} & \multicolumn{1}{l|}{\textbf{\begin{tabular}[c]{@{}l@{}}Entity\\ Type\end{tabular}}} \\ \hline
 		EN & 0.572 & 0.268 \\ \hline
 		FR & 0.136 & 0.094 \\ \hline
@@ -871,11 +995,11 @@ We compare the results on the EN and FR datasets between the RNN and MLP method.
 \end{table}
 
 \subsubsection{MLP}
-\begin{table}[htpb] 
+\begin{table}[htpb]
 	\centering
 	\begin{tabular}{|l|c|c|}
 		\hline
-		\multirow{2}{*}{\textbf{Dataset}} & \multicolumn{2}{c|}{\textbf{F-Score}} \\ \cline{2-3} 
+		\multirow{2}{*}{\textbf{Dataset}} & \multicolumn{2}{c|}{\textbf{F-Score}} \\ \cline{2-3}
 		& \multicolumn{1}{l|}{\textbf{Entity}} & \multicolumn{1}{l|}{\textbf{\begin{tabular}[c]{@{}l@{}}Entity\\ Type\end{tabular}}} \\ \hline
 		EN & 0.700 & 0.614 \\ \hline
 		FR & 0.677 & 0.467 \\ \hline
