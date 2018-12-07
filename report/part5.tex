@@ -851,7 +851,7 @@ In order to determine the optimal hyperparameters for this task, we perform a gr
     \caption{Hyperparameter Selection}
 \end{table}
 
-After performing the above search, we selected the best results based on the validation set. These were consistent for both the FR and EN dataset, with the optimal parameters being a batch size of $32$, learning rate of $1e-2$, learning rate decay of $1.0$ (no decay), and hidden dimension of $512$. The results for this model is presented in Table \ref{table:mlpresults}.
+After performing the above search, we selected the best results based on the validation set. For the EN dataset, the optimal parameters based on the validation set are a batch size of $8$, learning rate of $1e-2$, learning rate decay of $1.0$ (no decay), and hidden dimension of $512$. For the FR dataset, the optimal parameters are a batch size of $32$, learning rate of $1e-2$, learning rate decay of $1.0$, and hidden dimension of $512$. The results for this model is presented in Table \ref{table:mlpresults}.
 
 \subsection{Results}
 We compare the results on the EN and FR datasets between the RNN and MLP method.
