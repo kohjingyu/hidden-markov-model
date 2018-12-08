@@ -949,6 +949,8 @@ The regularization term helped to deal with the class imbalance in the labels du
 	\label{fig:class-labels}
 \end{figure}
 
+In addition, we make use of dropout \cite{srivastava2014dropout}. We add a dropout after the first hidden layer to help with overfitting issues. The probability of dropping out a neuron is a hyperparameter that we tune using grid search as described in Section \ref{sec:hyperparams}.
+
 \subsubsection{Class weighting}
 The class imbalance as illustrated in Figure \ref{fig:class-labels} caused the model to over-predict a particular class, resulting in very recall.\\
 
@@ -959,7 +961,7 @@ where $\circ$ is the element-wise multiplication between the two vectors.\\
 
 However, by introducing class weights, it was found that the precision of the results drastically worsened. As such, class weighting was not used.
 
-\subsubsection{Hyperparameter optimization}
+\subsubsection{Hyperparameter optimization} \label{sec:hyperparams}
 
 In order to determine the optimal hyperparameters for this task, we perform a grid search. We enumerate over the following hyperparameters and the possible values:
 \begin{table}[htpb]
@@ -967,15 +969,15 @@ In order to determine the optimal hyperparameters for this task, we perform a gr
     \begin{tabular}{|l|c|}
         \hline
         Hyperparameter & Possible Values \\ \hline
-        Batch Size & [8, 16, 32, 50, 64] \\ \hline
+        Batch Size & [8, 16, 32, 64] \\ \hline
         Learning Rate & [1e-2, 1e-3, 1e-4] \\ \hline
-        Learning Rate Decay & [1.0, 0.95, 0.9] \\ \hline
-        Hidden Dimension & [32, 64, 128, 256, 512] \\ \hline
+        Hidden Dimension & [32, 128, 256, 512] \\ \hline
+        Dropout & [0.0, 0.1, 0.2, 0.3] \\ \hline
     \end{tabular}
     \caption{Hyperparameter Selection}
 \end{table}
 
-After performing the above search, we selected the best results based on the validation set. For the EN dataset, the optimal parameters based on the validation set are a batch size of $8$, learning rate of $1e-2$, learning rate decay of $1.0$ (no decay), and hidden dimension of $512$. For the FR dataset, the optimal parameters are a batch size of $32$, learning rate of $1e-2$, learning rate decay of $1.0$, and hidden dimension of $512$. The results for this model is presented in Table \ref{table:mlpresults}.
+After performing the above search, we selected the best results based on the validation set. For the EN dataset, the optimal parameters based on the validation set are a batch size of $16$, learning rate of $1e-2$, hidden dimension of $512$, and dropout of $0.2$. For the FR dataset, the optimal parameters are a batch size of $64$, learning rate of $1e-2$, hidden dimension of $512$, and dropout of $0.2$. The results for the two models are presented in Table \ref{table:mlpresults}.
 
 \subsection{Results}
 We compare the results on the EN and FR datasets between the RNN and MLP method.
@@ -1001,8 +1003,8 @@ We compare the results on the EN and FR datasets between the RNN and MLP method.
 		\hline
 		\multirow{2}{*}{\textbf{Dataset}} & \multicolumn{2}{c|}{\textbf{F-Score}} \\ \cline{2-3}
 		& \multicolumn{1}{l|}{\textbf{Entity}} & \multicolumn{1}{l|}{\textbf{\begin{tabular}[c]{@{}l@{}}Entity\\ Type\end{tabular}}} \\ \hline
-		EN & 0.700 & 0.614 \\ \hline
-		FR & 0.677 & 0.467 \\ \hline
+		EN & 0.723 & 0.631 \\ \hline
+		FR & 0.683 & 0.472 \\ \hline
 	\end{tabular}
     \caption{MLP Results}
     \label{table:mlpresults}
@@ -1011,8 +1013,6 @@ We compare the results on the EN and FR datasets between the RNN and MLP method.
 \subsection{Evaluation}
 
 In general, we see that the MLP performs significantly  better than the RNN on all metrics. This is likely due to the vanishing gradients problem of the RNN, as some of the sentences may be quite long. Additionally, the FR dataset is quite poorly labeled, with most of the words being designated a label of "O". This may point to the downsides of a sequence based model, which may overfit to the poor structure in the sentences. We attribute the performance gain of the MLP for this task due to its high fitting power. With a hidden dimension size of $512$ neurons, it is able to fit the training set very well. \\
-
-To counter overfitting, we initially tried several regularization techniques such as dropout and weight decay. However, this did not have a noticeable improvement on the validation score. We think this may be due to the training and validation set having similar data distributions. Hence, our model is able to generalize well to the validation set.
 
 
 \newpage
