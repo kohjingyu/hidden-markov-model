@@ -42,6 +42,32 @@ The emission parameters are estimated using the same code as in part 2. The scri
 
 Part 4 asks us to implement a second order Hidden Markov Model. 
 
+## Design Challenge (Part 5)
+
+For our design challenge, we implemented and evaluated several deep neural networks. Our most successful model is using a multilayer perceptron. We implement forward pass and backpropagation from scratch using `numpy`. For more information, please refer to our report.
+
+To train the MLP on the appropriate dataset (`FR` or `EN`), we accept several command line arguments:
+
+```
+usage: mlp.py [-h] [--epochs EPOCHS] [--batch BATCH] [--lr LR]
+              [--hidden HIDDEN] [--decay DECAY] [--dropout DROPOUT]
+              dataset
+
+positional arguments:
+  dataset            {EN, FR}
+
+optional arguments:
+  -h, --help         show this help message and exit
+  --epochs EPOCHS    No. of epochs [10]
+  --batch BATCH      Batch size [64]
+  --lr LR            Learning rate [1e-2]
+  --hidden HIDDEN    No. of hidden units [128]
+  --decay DECAY      Learning rate decay [1.0]
+  --dropout DROPOUT  Probability of dropping [0.0]
+```
+
+To replicate our results, please follow the training procedure as detailed in our report.
+
 ## Evaluation script
 Pass no arguments to run evaluation on all.
 ```
@@ -51,3 +77,7 @@ Pass no arguments to run evaluation on all.
 ./eval.sh EN 2
 ./eval.sh SG 3
 ```
+
+## Acknowledgements
+
+This project was jointly worked on by Gabriel Wong, Lee Tze How, and Koh Jing Yu from SUTD. We thank Prof. Lu Wei and our TA Ngo Van Mao for their valuable advice and help during the course.
