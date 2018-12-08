@@ -14,6 +14,7 @@
 \usepackage{tikz}
 \usepackage{pgf}
 \usepackage{url}
+\usepackage{float}
 
 \usepackage{booktabs,multirow}
 \usetikzlibrary{arrows, automata}
@@ -175,16 +176,16 @@ In addition, for each tuple \lstinline{(a, b)} that we add to the dictionary, we
     'B-negative': 675, 'B-neutral': 113, 'I-negative': 233, 'I-neutral': 43}
 \end{verbatim}
 
-This allows us to efficiently retrieve $\text{\lstinline{Count}}(y_{i-1}, y_i)$ and $\text{\lstinline{Count}}(y_{i-1})$, and obtain the transition parameters
-	$$q(y_i | y_{i-1}) = \frac{\text{\lstinline{Count}}(y_{i-1}, y_i)}{\text{\lstinline{Count}}(y_{i-1})}$$
+This allows us to efficiently retrieve $\text{Count}(y_{i-1}, y_i)$ and $\text{Count}(y_{i-1})$, and obtain the transition parameters
+	$$q(y_i | y_{i-1}) = \frac{\text{Count}(y_{i-1}, y_i)}{\text{Count}(y_{i-1})}$$
 Note that \lstinline{STOP} is not necessary in the second dictionary, since there will never be a transition \emph{from} \lstinline{STOP}.
 
-In addition, when $\text{\lstinline{Count}}(y^*_{i-1}) = 0$, we simply allow $q(y_i | y^*_{i-1}) = 0$.
+In addition, when $\text{Count}(y^*_{i-1}) = 0$, we simply allow $q(y_i | y^*_{i-1}) = 0$.
 
 \subsection{Viterbi Algorithm} \label{sec:viterbi}
 Combining Parts 2 and 3, we now have the estimated transition and emission parameters. We will denote them as
-	$$ a_{u, v} = q(v | u) = \frac{\text{\lstinline{Count}}(u, v)}{\text{\lstinline{Count}}(u)} $$
-	$$ b_u(x_j) = e(x | y) = \frac{\text{\lstinline{Count}}(u \rightarrow x_j)}{\text{\lstinline{Count}}(u)} $$
+	$$ a_{u, v} = q(v | u) = \frac{\text{Count}(u, v)}{\text{Count}(u)} $$
+	$$ b_u(x_j) = e(x | y) = \frac{\text{Count}(u \rightarrow x_j)}{\text{Count}(u)} $$
 
 For each sequence , a \lstinline{pandas.DataFrame} object of size $\lvert\mathcal{T}\rvert \times (n+2)$ is used to store the probabilities of a given state at a given time, where $n$ is the length of the sequence, and $\mathcal{T}$ is the set of all states in training. $(n+2)$ is used to include the \lstinline{START} and \lstinline{STOP} observations as well.\\
 
@@ -250,20 +251,20 @@ Our results on the four datasets are as follows:
 
 \newpage
 \section{Second-Order Hidden Markov Model}
-The Second Order Hidden Markov Model works on a similar principle to the First Order, except now we also want to consider the \textit{prior} state in addition to the current state during our expectation maximization. Our Viterbi algorithm is thus a modified version of the algorithm discussed in section \ref{sec:viterbi}.\\
+The Second Order Hidden Markov Model works on a similar principle to the First Order, except now we also want to consider the \textit{prior} state in addition to the current state during our expectation maximization. Our Viterbi algorithm is thus a modified version of the algorithm discussed in Section \ref{sec:viterbi}.\\
 
-We initialize the system by cleaning words as they are input - genericizing punctuations, hash mentions, @-mentions, and the like. We also introduce an #UNK# term to optimize our results further, for terms being seen for the first time. Further elaboration on this data cleaning can be found in section \ref{sec:cleaning}.
+We initialize the system by cleaning words as they are input - genericizing punctuations, hash mentions, @-mentions, and the like. We also introduce an \lstinline{#UNK#} term to optimize our results further, for terms being seen for the first time. Further elaboration on this data cleaning can be found in Section \ref{sec:cleaning}.
 
 \subsection{Emissions Matrix Training}
-Our emissions matrix is trained identically to that in section \ref{sec:emissions}, with emissions mapped to the current state via Maximum Likelihood Estimation (MLE).
+Our emissions matrix is trained identically to that in Section \ref{sec:emissions}, with emissions mapped to the current state via Maximum Likelihood Estimation (MLE).
 
 \subsection{Transition Matrix Training}
 Our transition matrix training process is now a modified version of that of the initial process. As ours is now a second order Hidden Markov Model, we now need to map the likelihood of \textit{sequence pairs} leading to output states for our transition matrix.\\
 
 Mathematically, our previous state, current state, and next state are represented by $t, u, v$ respectively. Our modified matrices are hence:
 
-$$ a_{t, u, v} = q(v | t, u) = \frac{\text{\lstinline{Count}}(t, u, v)}{\text{\lstinline{Count}}(t, u)} $$
-$$ b_u(x_j) = e(x | y) = \frac{\text{\lstinline{Count}}(u \rightarrow x_j)}{\text{\lstinline{Count}}(u)} $$
+$$ a_{t, u, v} = q(v | t, u) = \frac{\text{Count}(t, u, v)}{\text{Count}(t, u)} $$
+$$ b_u(x_j) = e(x | y) = \frac{\text{Count}(u \rightarrow x_j)}{\text{Count}(u)} $$
 
 Our Python implementation for the modified training of the transition matrix is as follows:
 
@@ -292,13 +293,15 @@ for line in lines:
 
 Our Viterbi algorithm is also now modified to accommodate this two-element transition source. Both the probability and backpointer tables now have a state pair as the index, and $n$ columns where $n$ is the number of words in the sentence being evaluated.
 
-The time complexity of this system is still $n|T^2|$. However, now have $num\_states^2$ number of states (every unique pair). As T increases by a factor of T, the runtime will be slower than the first-order Viterbi algorithm.
+The time complexity of this system is $O(n|\mathcal{T}'|^2)$, where $\mathcal{T}'$ is the set of all states in the second-order hidden Markov model. Each state in $\mathcal{T}'$ is a unique pair of two states from $\mathcal{T}$, where $\mathcal{T}$ is the set of all observed states. By this relationship, $|\mathcal{T}'| = |\mathcal{T}|^2$. Thus, the runtime will be slower than the first-order Viterbi algorithm.
 
 \subsubsection{Initialization}
-We begin by initializing $\pi(PRESTART,START,0) = 1$.
-Similar to the original Viterbi algorithm, we have:\\
-- A matrix, P, which serves as our probability table\\
-- A matrix, B, which serves as our backpointer table\\
+We begin by initializing $\pi(\text{\lstinline{PRESTART}}, \text{\lstinline{START}}, 0) = 1$.
+Similar to the original Viterbi algorithm, we have:
+\begin{itemize}
+	\item A matrix, P, which serves as our probability table
+	\item A matrix, B, which serves as our backpointer table
+\end{itemize}
 
 Both matrices have an index being the total possible unique combinations of our states.
 
@@ -344,7 +347,7 @@ j = n - 1
 \end{verbatim}
 
 \subsubsection{Backtracing}
-After our Probability and Backpointer tables have been fully populated, we generate our predicted state sequence by accessing parent states via the backtracing table.
+After our probability and backpointer tables have been fully populated, we generate our predicted state sequence by accessing parent states via the backtracing table.
 
 \begin{verbatim}
 state_pair = P[n-1].idxmax()
@@ -987,7 +990,7 @@ After performing the above search, we selected the best results based on the val
 We compare the results on the EN and FR datasets between the RNN and MLP method.
 
 \subsubsection{RNN}
-\begin{table}[htpb]
+\begin{table}[H]
 	\centering
 	\begin{tabular}{|l|c|c|}
 		\hline
@@ -1001,7 +1004,7 @@ We compare the results on the EN and FR datasets between the RNN and MLP method.
 \end{table}
 
 \subsubsection{MLP}
-\begin{table}[htpb]
+\begin{table}[H]
 	\centering
 	\begin{tabular}{|l|c|c|}
 		\hline
