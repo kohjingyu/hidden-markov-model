@@ -23,6 +23,7 @@ data
 Part 2 entails estimating the emission probabilities from the given dataset. Our code is contained within `part2/hmm_part2.py`. To run it for a particular dataset, execute the following on the command line:
 
 ```
+cd part2
 python hmm_part2.py SG
 ```
 
@@ -33,6 +34,7 @@ Where `SG` may be replaced by any of the valid datasets. After running the scrip
 Part 3 involves estimating the transition probabilities from the given dataset, and implementing the Viterbi algorithm to compute the most likely sequence. To run our code, execute the following:
 
 ```
+cd part3
 python hmm_part3.py
 ```
 
@@ -40,13 +42,20 @@ The emission parameters are estimated using the same code as in part 2. The scri
 
 ## Part 4
 
-Part 4 asks us to implement a second order Hidden Markov Model. 
+Part 4 requires us to implement a second order Hidden Markov Model. To run our code, execute the following:
+
+```
+cd part4
+python hmm_part4.py
+```
+
+Predictions from the second order HMM are generated for `EN` and `FR`, and written to file. For more information, please refer to our report.
 
 ## Design Challenge (Part 5)
 
 For our design challenge, we implemented and evaluated several deep neural networks. Our most successful model is using a multilayer perceptron. We implement forward pass and backpropagation from scratch using `numpy`. For more information, please refer to our report.
 
-To train the MLP on the appropriate dataset (`FR` or `EN`), we accept several command line arguments:
+The relevant files are located in the `part5` folder. To train the MLP on the appropriate dataset (`FR` or `EN`), we accept several command line arguments:
 
 ```
 usage: mlp.py [-h] [--epochs EPOCHS] [--batch BATCH] [--lr LR]
