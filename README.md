@@ -4,6 +4,8 @@ Authors: Gabriel Wong (1002299), Lee Tze How (1002033), Koh Jing Yu (1002045)
 
 This repository hosts the code for our submission for the 01.112 Project. It contains 4 parts: the 3 sections as described in the project description, and our design project (`part5`).
 
+Our predictions for the project and design challenge are contained within the `results` folder.
+
 For a full documentation of our methods and results, please refer to our report (`report/report.pdf`).
 
 ## Directory Setup
