@@ -252,6 +252,8 @@ Our results on the four datasets are as follows:
 \section{Second-Order Hidden Markov Model}
 The Second Order Hidden Markov Model works on a similar principle to the First Order, except now we also want to consider the \textit{prior} state in addition to the current state during our expectation maximization. Our Viterbi algorithm is thus a modified version of the algorithm discussed in \ref{sec:viterbi}.\\
 
+We initialize the system by cleaning words as they are input - genericizing punctuations, hash mentions, @-mentions, and the like. We also introduce an #UNK# term to optimize our results further, for terms being seen for the first time.
+
 \subsection{Emissions Matrix Training}
 Our emissions matrix is trained identically to that in section \ref{sec:emissions}, with emissions mapped to the current state via Maximum Likelihood Estimation (MLE).
 
@@ -367,8 +369,8 @@ Our results on the EN and FR datasets are as follows:
 \hline
 \multirow{2}{*}{\textbf{Dataset}} & \multicolumn{2}{c|}{\textbf{F-Score}} \\ \cline{2-3}
  & \multicolumn{1}{l|}{\textbf{Entity}} & \multicolumn{1}{l|}{\textbf{\begin{tabular}[c]{@{}l@{}}Entity\\ Type\end{tabular}}} \\ \hline
-EN & 0.5619 & 0.3977 \\ \hline
-FR & 0.5238 & 0.3254 \\ \hline
+EN & 0.6495 & 0.5701 \\ \hline
+FR & 0.5278 & 0.3254 \\ \hline
 \end{tabular}
 \end{table}
 
