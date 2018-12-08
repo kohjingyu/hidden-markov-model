@@ -15,4 +15,10 @@ I.~Goodfellow, Y.~Bengio, and A.~Courville, {\em Deep Learning}.
 \newblock MIT Press, 2016.
 \newblock \url{http://www.deeplearningbook.org}.
 
+\bibitem{srivastava2014dropout}
+N.~Srivastava, G.~Hinton, A.~Krizhevsky, I.~Sutskever, and R.~Salakhutdinov,
+  ``Dropout: a simple way to prevent neural networks from overfitting,'' {\em
+  The Journal of Machine Learning Research}, vol.~15, no.~1, pp.~1929--1958,
+  2014.
+
 \end{thebibliography}

@@ -1,9 +1,9 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2017.8.23)  8 DEC 2018 11:57
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2017.8.23)  8 DEC 2018 12:24
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**part5
-(./part5.tex
+**report.tex
+(./report.tex
 LaTeX2e <2017-04-15>
 Babel <3.10> and hyphenation patterns for 84 language(s) loaded.
 (/usr/local/texlive/2017/texmf-dist/tex/latex/base/article.cls
@@ -596,8 +596,8 @@ File: pgflibraryshapes.multipart.code.tex 2010/01/07 v3.0.1a (rcs-revision 1.2)
 \pgfnodepartsevenbox=\box60
 \pgfnodepartsixbox=\box61
 \pgfnodepartfivebox=\box62
-))) (./part5.aux)
-\openout1 = `part5.aux'.
+))) (./report.aux)
+\openout1 = `report.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 40.
 LaTeX Font Info:    ... okay on input line 40.
@@ -721,12 +721,12 @@ LaTeX Font Info:    Try loading font information for U+msb on input line 41.
 
 (/usr/local/texlive/2017/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-) (./part5.toc
+) (./report.toc
 [1
 
 {/usr/local/texlive/2017/texmf-var/fonts/map/pdftex/updmap/pdftex.map}])
 \tf@toc=\write4
-\openout4 = `part5.toc'.
+\openout4 = `report.toc'.
 
 
 [2]
@@ -904,36 +904,33 @@ Package pdftex.def Info: assets/class_labels.png used on input line 947.
 (pdftex.def)             Requested size: 422.77664pt x 116.00018pt.
  [20 <./assets/loss_nobatch.png> <./assets/loss_batch.png> <./assets/class_labe
 ls.png>]
-Underfull \hbox (badness 10000) in paragraph at lines 953--954
+Underfull \hbox (badness 10000) in paragraph at lines 955--956
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 957--959
+Underfull \hbox (badness 10000) in paragraph at lines 959--961
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1013--1014
+Underfull \hbox (badness 10000) in paragraph at lines 1015--1016
 
  []
 
-[21] [22] (./part5.bbl) [23] (./part5.aux)
+[21] [22] (./report.bbl) [23] (./report.aux)
 
 LaTeX Warning: There were undefined references.
 
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
  ) 
 Here is how much of TeX's memory you used:
- 17066 strings out of 492995
- 337278 string characters out of 6132704
- 398136 words of memory out of 5000000
- 20272 multiletter control sequences out of 15000+600000
+ 17068 strings out of 492995
+ 337331 string characters out of 6132704
+ 398153 words of memory out of 5000000
+ 20274 multiletter control sequences out of 15000+600000
  18314 words of font info for 68 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 55i,21n,76p,622b,980s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 55i,21n,76p,627b,980s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2017/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/t
 exlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/local/te
 xlive/2017/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/local/tex
@@ -959,7 +956,7 @@ pe1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2017/texmf-dist/fonts/typ
 e1/public/amsfonts/symbols/msam10.pfb></usr/local/texlive/2017/texmf-dist/fonts
 /type1/public/amsfonts/symbols/msbm10.pfb></usr/local/texlive/2017/texmf-dist/f
 onts/type1/urw/courier/ucrr8a.pfb>
-Output written on part5.pdf (23 pages, 656742 bytes).
+Output written on report.pdf (23 pages, 657371 bytes).
 PDF statistics:
  190 PDF objects out of 1000 (max. 8388607)
  129 compressed objects within 2 object streams
