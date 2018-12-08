@@ -10,7 +10,8 @@ def clean_word(w):
     1. Converts stopwords into #STOP#. Our list of stopwords is derived from the nltk library.
     2. Converts punctuations, #s, @s, numbers, URLs into accompanying genericized labels
     '''
-    stopwords = {'it', 'before', "you're", 'wouldn', "hasn't", 'again', 'just', "you'd", 'only', "wouldn't", "isn't", 'no', 'yourself', 'them', 'in', 's', "aren't", 'because', 'ourselves', 'more', "couldn't", "shan't", "shouldn't", 'shan', 't', 'needn', "hadn't", 'both', 'such', 'below', 'out', 'my', "haven't", 'there', 'off', 'few', 'against', 'each', 'can', 'yourselves', 'some', 'further', 'if', 'under', 'over', 'theirs', 'his', 'herself', 'been', 'her', 'than', "you've", 'into', 'have', 'aren', 'and', 'then', 'whom', 'having', 'the', 'by', 'itself', 'him', 'up', 'be', "wasn't", 'me', 'of', 'haven', 'they', "mightn't", 'our', 'are', 'how', "weren't", 'couldn', 'too', "should've", 'until', 'weren', "that'll", 'a', 'when', "doesn't", 'which', 'here', 'was', 'hers', 'ain', 'mightn', 'those', 'himself', 'or', 'while', 'i', 'yours', 'from', 'once', 'after', 'does', 'its', 'to', 'you', 'myself', 'don', 'shouldn', 'most', 'that', 'mustn', 'same', "it's", 'what', 'any', 'did', 'isn', 'she', 'these', 'with', 'during', "needn't", 'your', 'their', 'being', 'on', 'above', 've', 'won', 'down', "she's", 're', 'this', 'do', 'hasn', 'had', 'so', 'other', 'an', 'were', 'hadn', 'themselves', 'will', 'as', 'for', 'at', 'd', 'm', 'but', 'ma', 'didn', 'll', 'not', "won't", 'ours', 'who', 'through', 'all', 'now', 'o', 'nor', "mustn't", "you'll", 'where', 'doesn', 'y', 'doing', 'why', 'between', "didn't", 'he', 'we', 'wasn', 'has', 'very', "don't", 'own', 'about', 'is', 'should', 'am'}
+    # stopwords = {'it', 'before', "you're", 'wouldn', "hasn't", 'again', 'just', "you'd", 'only', "wouldn't", "isn't", 'no', 'yourself', 'them', 'in', 's', "aren't", 'because', 'ourselves', 'more', "couldn't", "shan't", "shouldn't", 'shan', 't', 'needn', "hadn't", 'both', 'such', 'below', 'out', 'my', "haven't", 'there', 'off', 'few', 'against', 'each', 'can', 'yourselves', 'some', 'further', 'if', 'under', 'over', 'theirs', 'his', 'herself', 'been', 'her', 'than', "you've", 'into', 'have', 'aren', 'and', 'then', 'whom', 'having', 'the', 'by', 'itself', 'him', 'up', 'be', "wasn't", 'me', 'of', 'haven', 'they', "mightn't", 'our', 'are', 'how', "weren't", 'couldn', 'too', "should've", 'until', 'weren', "that'll", 'a', 'when', "doesn't", 'which', 'here', 'was', 'hers', 'ain', 'mightn', 'those', 'himself', 'or', 'while', 'i', 'yours', 'from', 'once', 'after', 'does', 'its', 'to', 'you', 'myself', 'don', 'shouldn', 'most', 'that', 'mustn', 'same', "it's", 'what', 'any', 'did', 'isn', 'she', 'these', 'with', 'during', "needn't", 'your', 'their', 'being', 'on', 'above', 've', 'won', 'down', "she's", 're', 'this', 'do', 'hasn', 'had', 'so', 'other', 'an', 'were', 'hadn', 'themselves', 'will', 'as', 'for', 'at', 'd', 'm', 'but', 'ma', 'didn', 'll', 'not', "won't", 'ours', 'who', 'through', 'all', 'now', 'o', 'nor', "mustn't", "you'll", 'where', 'doesn', 'y', 'doing', 'why', 'between', "didn't", 'he', 'we', 'wasn', 'has', 'very', "don't", 'own', 'about', 'is', 'should', 'am'}
+    stopwords = {}
     re_punc = r'^[^a-zA-Z0-9]+$'
     re_hash = r'^#'
     re_at = r'^@'
@@ -244,7 +245,7 @@ def validate(dataset, t, e):
                 f.write(word + ' ' + pred)
             f.write('\n')
 
-datasets = ['EN', 'FR']
+datasets = ['EN', 'CN', 'SG', 'FR']
 for dataset in datasets:
     t, e = train(dataset)
     validate(dataset, t, e)

@@ -292,6 +292,8 @@ for line in lines:
 
 Our Viterbi algorithm is also now modified to accommodate this two-element transition source. Both the probability and backpointer tables now have a state pair as the index, and $n$ columns where $n$ is the number of words in the sentence being evaluated.
 
+The time complexity of this system is still $n|T^2|$. However, now have $num\_states^2$ number of states (every unique pair). As T increases by a factor of T, the runtime will be slower than the First-Order Viterbi algorithm.
+
 \subsubsection{Initialization}
 We begin by initializing $\pi(PRESTART,START,0) = 1$.
 Similar to the original Viterbi algorithm, we have:
