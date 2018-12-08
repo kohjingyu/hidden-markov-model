@@ -1,15 +1,15 @@
 # Fdb version 3
-["bibtex report"] 1544266035 "report.aux" "report.bbl" "report" 1544266100
+["bibtex report"] 1544269856 "report.aux" "report.bbl" "report" 1544269968
   "/usr/share/texlive/texmf-dist/bibtex/bst/base/ieeetr.bst" 1292289607 18361 1a00e58565e7f19bf2b3e1bfb82254ae ""
   "bibliography.bib" 1544263770 1531 7c05d3b72e56759a12e03b6f403c4035 ""
-  "report.aux" 1544266100 7762 b892d7e8954ee53ae8f345857416669d ""
+  "report.aux" 1544269968 7832 266a273d019957538c23ed578f5a7015 ""
   "report.bcf" 0 -1 0 ""
   (generated)
-  "report.bbl"
   "report.blg"
-["pdflatex"] 1544266099 "report.tex" "/home/tze/Documents/ML/hidden-markov-model/report/report.pdf" "report" 1544266100
+  "report.bbl"
+["pdflatex"] 1544269967 "report.tex" "/home/tze/Documents/ML/hidden-markov-model/report/report.pdf" "report" 1544269968
   "/etc/texmf/web2c/texmf.cnf" 1542959564 1101 af7716885e081ab43982cab7b4672c1a ""
-  "/home/tze/Documents/ML/hidden-markov-model/report/report.aux" 1544266100 7762 b892d7e8954ee53ae8f345857416669d ""
+  "/home/tze/Documents/ML/hidden-markov-model/report/report.aux" 1544269968 7832 266a273d019957538c23ed578f5a7015 ""
   "/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1272929888 3287 e6b82fe08f5336d4d5ebc73fb1152e87 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/courier/pcrr7t.tfm" 1136768653 960 379cc0019370a9e0208a0a3f949f847a ""
@@ -201,14 +201,14 @@
   "assets/loss_nobatch.png" 1544025522 107064 2dc5f5f60ca0a59518cda736888aaabe ""
   "assets/rnn.png" 1544025522 152872 6709153999d2e5b9bc41ce9792eaa3fc ""
   "assets/word2vec.png" 1544025522 64980 b780fa71a08999e6f10b2885cdd524d2 ""
-  "report.aux" 1544266100 7762 b892d7e8954ee53ae8f345857416669d ""
-  "report.bbl" 1544266035 944 dfa9d2666c33a1e5387052680510901c "bibtex report"
-  "report.tex" 1544266095 45678 3a5b3104bc9da3e03b5dac7349762b21 ""
-  "report.toc" 1544266100 4018 93ed676ba3868f1217c6d9987942a88e ""
+  "report.aux" 1544269968 7832 266a273d019957538c23ed578f5a7015 ""
+  "report.bbl" 1544269856 944 dfa9d2666c33a1e5387052680510901c "bibtex report"
+  "report.tex" 1544269963 45654 21fb2016e811d1862dbddd91cb23ea02 ""
+  "report.toc" 1544269968 4018 93ed676ba3868f1217c6d9987942a88e ""
   (generated)
-  "/home/tze/Documents/ML/hidden-markov-model/report/report.log"
-  "report.log"
   "report.toc"
-  "report.aux"
-  "report.pdf"
   "/home/tze/Documents/ML/hidden-markov-model/report/report.pdf"
+  "/home/tze/Documents/ML/hidden-markov-model/report/report.log"
+  "report.pdf"
+  "report.log"
+  "report.aux"

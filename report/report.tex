@@ -181,7 +181,7 @@ Note that \lstinline{STOP} is not necessary in the second dictionary, since ther
 
 In addition, when $\text{\lstinline{Count}}(y^*_{i-1}) = 0$, we simply allow $q(y_i | y^*_{i-1}) = 0$.
 
-\subsection{Viterbi Algorithm}
+\subsection{Viterbi Algorithm} \label{sec:viterbi}
 Combining Parts 2 and 3, we now have the estimated transition and emission parameters. We will denote them as
 	$$ a_{u, v} = q(v | u) = \frac{\text{\lstinline{Count}}(u, v)}{\text{\lstinline{Count}}(u)} $$
 	$$ b_u(x_j) = e(x | y) = \frac{\text{\lstinline{Count}}(u \rightarrow x_j)}{\text{\lstinline{Count}}(u)} $$
@@ -250,9 +250,9 @@ Our results on the four datasets are as follows:
 
 \newpage
 \section{Second-Order Hidden Markov Model}
-The Second Order Hidden Markov Model works on a similar principle to the First Order, except now we also want to consider the \textit{prior} state in addition to the current state during our expectation maximization. Our Viterbi algorithm is thus a modified version of the algorithm discussed in \ref{sec:viterbi}.\\
+The Second Order Hidden Markov Model works on a similar principle to the First Order, except now we also want to consider the \textit{prior} state in addition to the current state during our expectation maximization. Our Viterbi algorithm is thus a modified version of the algorithm discussed in section \ref{sec:viterbi}.\\
 
-We initialize the system by cleaning words as they are input - genericizing punctuations, hash mentions, @-mentions, and the like. We also introduce an #UNK# term to optimize our results further, for terms being seen for the first time.
+We initialize the system by cleaning words as they are input - genericizing punctuations, hash mentions, @-mentions, and the like. We also introduce an #UNK# term to optimize our results further, for terms being seen for the first time. Further elaboration on this data cleaning can be found in section \ref{sec:cleaning}.
 
 \subsection{Emissions Matrix Training}
 Our emissions matrix is trained identically to that in section \ref{sec:emissions}, with emissions mapped to the current state via Maximum Likelihood Estimation (MLE).
@@ -292,13 +292,13 @@ for line in lines:
 
 Our Viterbi algorithm is also now modified to accommodate this two-element transition source. Both the probability and backpointer tables now have a state pair as the index, and $n$ columns where $n$ is the number of words in the sentence being evaluated.
 
-The time complexity of this system is still $n|T^2|$. However, now have $num\_states^2$ number of states (every unique pair). As T increases by a factor of T, the runtime will be slower than the First-Order Viterbi algorithm.
+The time complexity of this system is still $n|T^2|$. However, now have $num\_states^2$ number of states (every unique pair). As T increases by a factor of T, the runtime will be slower than the first-order Viterbi algorithm.
 
 \subsubsection{Initialization}
 We begin by initializing $\pi(PRESTART,START,0) = 1$.
-Similar to the original Viterbi algorithm, we have:
-- A matrix, P, which serves as our probability table
-- A matrix, B, which serves as our backpointer table
+Similar to the original Viterbi algorithm, we have:\\
+- A matrix, P, which serves as our probability table\\
+- A matrix, B, which serves as our backpointer table\\
 
 Both matrices have an index being the total possible unique combinations of our states.
 
@@ -315,16 +315,16 @@ In addition, we also use the backpointer table to store the state transition $(y
 
 \begin{verbatim}
 for j in range(1, n-1):
-		x = clean_word(obs_seq[j-1])
-		if x not in dictionary:
-				x = "#UNK#"
-		for v in states:  # curr state
-				for u in states:  # parent
-						for t in states: # grandparent
-								p = P.loc[(t, u), j-1] * a(t, u, v) * b(v, x)
-								if p > P.loc[(u, v), j]:
-										P.loc[(u, v), j] = p  # update probability
-										B.loc[(u, v), j] = t  # update backpointer - t is the grandfather
+  x = clean_word(obs_seq[j-1])
+  if x not in dictionary:
+    x = "#UNK#"
+  for v in states:  # curr state
+    for u in states:  # parent
+      for t in states: # grandparent
+        p = P.loc[(t, u), j-1] * a(t, u, v) * b(v, x)
+        if p > P.loc[(u, v), j]:
+          P.loc[(u, v), j] = p  # update probability
+          B.loc[(u, v), j] = t  # update backpointer - t is the grandfather
 \end{verbatim}
 
 This operation is repeated for $j = \{1, ..., n\}$.
@@ -383,7 +383,7 @@ FR & 0.528 & 0.325 \\ \hline
 \subsubsection{String tokenization}
 Each file can be considered a corpus, the documents being each sentence in the file. Tokenizing was carried out by converting each sentence into a list of words. During tokenization, all whitespace was stripped from the beginning and end of each word. Also, each token is normalized by converting to lowercase.
 
-\subsubsection{Replacing irrelevant words}
+\subsubsection{Replacing irrelevant words} \label{sec:cleaning}
 In the initial problem, the training data contains a large vocabulary of words which occurred only a single time. To mitigate this issue, several types of words were converted into various placeholders instead, as they do not carry semantic meaning. \\
 
 The placeholders used are as follows:
