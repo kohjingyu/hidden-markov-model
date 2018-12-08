@@ -177,12 +177,12 @@ def train(model, X_train, y_train, X_val, X_test, state_mapping, val_sentences, 
             y_pred = predict(state_mapping, forward(*model, x=X_val[j]))
             results.append(y_pred)
 
-        # test_results = []  # get and store predictions
-        # for j in trange(len(X_test), desc='Validation', leave=False):
-        #     y_pred = predict(state_mapping, forward(*model, x=X_test[j]))
-        #     test_results.append(y_pred)
+        test_results = []  # get and store predictions
+        for j in trange(len(X_test), desc='Validation', leave=False):
+            y_pred = predict(state_mapping, forward(*model, x=X_test[j]))
+            test_results.append(y_pred)
 
-        # write_predictions(test_results, test_sentences, test_out_filename+".{}".format(i))
+        write_predictions(test_results, test_sentences, test_out_filename+".{}".format(i))
 
         lr *= decay
         scores.append(get_scores(results, val_sentences, out_filename, val_filename))
