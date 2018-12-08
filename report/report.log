@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2018.12.8)  8 DEC 2018 22:26
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=pdflatex 2018.12.8)  8 DEC 2018 22:40
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -945,7 +945,7 @@ fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texlive/texmf-dist/fonts/
 type1/public/amsfonts/symbols/msam10.pfb></usr/share/texlive/texmf-dist/fonts/t
 ype1/public/amsfonts/symbols/msbm10.pfb></usr/share/texlive/texmf-dist/fonts/ty
 pe1/urw/courier/ucrr8a.pfb>
-Output written on report.pdf (23 pages, 657816 bytes).
+Output written on report.pdf (23 pages, 657883 bytes).
 PDF statistics:
  190 PDF objects out of 1000 (max. 8388607)
  129 compressed objects within 2 object streams

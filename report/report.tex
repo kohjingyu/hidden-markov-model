@@ -293,7 +293,7 @@ for line in lines:
 
 Our Viterbi algorithm is also now modified to accommodate this two-element transition source. Both the probability and backpointer tables now have a state pair as the index, and $n$ columns where $n$ is the number of words in the sentence being evaluated.
 
-The time complexity of this system is $O(n|\mathcal{T}'|^2)$, where $\mathcal{T}'$ is the set of all states in the second-order hidden Markov model. Each state in $\mathcal{T}'$ is a unique pair of two states from $\mathcal{T}$, where $\mathcal{T}$ is the set of all observed states. By this relationship, $|\mathcal{T}'| = |\mathcal{T}|^2$. Thus, the runtime will be slower than the first-order Viterbi algorithm.
+At each time step of the Viterbi algorithm, we look at a pair of previous states to determine the next state. Let $\mathcal{T}$ be the set of all observed states. It follows that there are $|\mathcal{T}|^2$ pairs of states. For each pair, we then determine the next state by iterating through all states in $\mathcal{T}$. This operation is thus $O(|\mathcal{T}|^2 \cdot |\mathcal{T}|)$. Since there are $n$ time steps, where $n$ is the length of the observed sequence, the time complexity of the modified Viterbi algorithm is $O(n|\mathcal{T}|^3)$.
 
 \subsubsection{Initialization}
 We begin by initializing $\pi(\text{\lstinline{PRESTART}}, \text{\lstinline{START}}, 0) = 1$.
