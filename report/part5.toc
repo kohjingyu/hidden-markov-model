@@ -3,53 +3,61 @@
 \contentsline {subsection}{\numberline {2.2}Laplace Smoothing}{3}
 \contentsline {subsection}{\numberline {2.3}Sequence Labeling}{4}
 \contentsline {subsection}{\numberline {2.4}Results}{4}
-\contentsline {section}{\numberline {3}First-Order Hidden Markov Model}{4}
-\contentsline {subsection}{\numberline {3.1}Transition Parameters Emission}{4}
+\contentsline {section}{\numberline {3}First-Order Hidden Markov Model}{5}
+\contentsline {subsection}{\numberline {3.1}Transition Parameters Emission}{5}
 \contentsline {subsection}{\numberline {3.2}Viterbi Algorithm}{5}
 \contentsline {subsubsection}{\numberline {3.2.1}Initialization}{5}
 \contentsline {subsubsection}{\numberline {3.2.2}Recursion}{5}
 \contentsline {subsubsection}{\numberline {3.2.3}Backtracking}{6}
 \contentsline {subsection}{\numberline {3.3}Results}{6}
-\contentsline {section}{\numberline {4}Second-Order Hidden Markov Model}{6}
-\contentsline {section}{\numberline {5}Design Challenge}{6}
-\contentsline {subsection}{\numberline {5.1}Preprocessing}{6}
-\contentsline {subsubsection}{\numberline {5.1.1}String tokenization}{6}
-\contentsline {subsubsection}{\numberline {5.1.2}Replacing irrelevant words}{6}
-\contentsline {subsubsection}{\numberline {5.1.3}Stop words}{7}
-\contentsline {subsection}{\numberline {5.2}Simple vectorization}{7}
-\contentsline {subsubsection}{\numberline {5.2.1}Tokenizing}{7}
-\contentsline {subsubsection}{\numberline {5.2.2}One-hot encoding}{7}
-\contentsline {subsection}{\numberline {5.3}word2vec}{7}
-\contentsline {subsubsection}{\numberline {5.3.1}Skip-gram}{7}
-\contentsline {subsubsection}{\numberline {5.3.2}Forward}{8}
-\contentsline {subsubsection}{\numberline {5.3.3}Backward}{8}
-\contentsline {subsubsection}{\numberline {5.3.4}Training}{8}
-\contentsline {paragraph}{Positive sampling}{8}
-\contentsline {paragraph}{Negative sampling}{8}
-\contentsline {subsubsection}{\numberline {5.3.5}Visualization}{9}
-\contentsline {subsubsection}{\numberline {5.3.6}Inference}{9}
-\contentsline {subsection}{\numberline {5.4}Recurrent neural network (RNN)}{10}
-\contentsline {subsubsection}{\numberline {5.4.1}Forward}{10}
-\contentsline {subsubsection}{\numberline {5.4.2}Backward}{11}
-\contentsline {paragraph}{Output layer}{11}
-\contentsline {paragraph}{Hidden layer}{11}
-\contentsline {paragraph}{Summary}{14}
-\contentsline {subsection}{\numberline {5.5}Multilayer perceptron (MLP)}{14}
-\contentsline {subsubsection}{\numberline {5.5.1}Forward}{14}
-\contentsline {subsubsection}{\numberline {5.5.2}Backward}{14}
+\contentsline {section}{\numberline {4}Second-Order Hidden Markov Model}{7}
+\contentsline {subsection}{\numberline {4.1}Emissions Matrix Training}{7}
+\contentsline {subsection}{\numberline {4.2}Transition Matrix Training}{7}
+\contentsline {subsection}{\numberline {4.3}Modified Viterbi Algorithm}{7}
+\contentsline {subsubsection}{\numberline {4.3.1}Initialization}{8}
+\contentsline {subsubsection}{\numberline {4.3.2}Recursion}{8}
+\contentsline {subsubsection}{\numberline {4.3.3}Termination}{8}
+\contentsline {subsubsection}{\numberline {4.3.4}Backtracing}{8}
+\contentsline {subsection}{\numberline {4.4}Results}{9}
+\contentsline {section}{\numberline {5}Design Challenge}{10}
+\contentsline {subsection}{\numberline {5.1}Preprocessing}{10}
+\contentsline {subsubsection}{\numberline {5.1.1}String tokenization}{10}
+\contentsline {subsubsection}{\numberline {5.1.2}Replacing irrelevant words}{10}
+\contentsline {subsubsection}{\numberline {5.1.3}Stop words}{10}
+\contentsline {subsection}{\numberline {5.2}Simple vectorization}{10}
+\contentsline {subsubsection}{\numberline {5.2.1}Tokenizing}{10}
+\contentsline {subsubsection}{\numberline {5.2.2}One-hot encoding}{11}
+\contentsline {subsection}{\numberline {5.3}word2vec}{11}
+\contentsline {subsubsection}{\numberline {5.3.1}Skip-gram}{11}
+\contentsline {subsubsection}{\numberline {5.3.2}Forward}{11}
+\contentsline {subsubsection}{\numberline {5.3.3}Backward}{11}
+\contentsline {subsubsection}{\numberline {5.3.4}Training}{12}
+\contentsline {paragraph}{Positive sampling}{12}
+\contentsline {paragraph}{Negative sampling}{12}
+\contentsline {subsubsection}{\numberline {5.3.5}Visualization}{12}
+\contentsline {subsubsection}{\numberline {5.3.6}Inference}{12}
+\contentsline {subsection}{\numberline {5.4}Recurrent neural network (RNN)}{13}
+\contentsline {subsubsection}{\numberline {5.4.1}Forward}{13}
+\contentsline {subsubsection}{\numberline {5.4.2}Backward}{14}
 \contentsline {paragraph}{Output layer}{14}
-\contentsline {paragraph}{Second hidden layer}{15}
-\contentsline {paragraph}{First hidden layer}{15}
-\contentsline {subsection}{\numberline {5.6}Training}{16}
-\contentsline {subsubsection}{\numberline {5.6.1}Weight initialization}{16}
-\contentsline {subsubsection}{\numberline {5.6.2}Batch updates}{16}
-\contentsline {subsubsection}{\numberline {5.6.3}Optimizers}{16}
-\contentsline {paragraph}{Stochastic gradient descent}{16}
-\contentsline {paragraph}{Adagrad}{16}
-\contentsline {subsubsection}{\numberline {5.6.4}Regularization}{17}
-\contentsline {subsubsection}{\numberline {5.6.5}Class weighting}{17}
-\contentsline {subsubsection}{\numberline {5.6.6}Hyperparameter optimization}{17}
-\contentsline {subsection}{\numberline {5.7}Results}{17}
-\contentsline {subsubsection}{\numberline {5.7.1}RNN}{18}
-\contentsline {subsubsection}{\numberline {5.7.2}MLP}{18}
-\contentsline {subsection}{\numberline {5.8}Evaluation}{18}
+\contentsline {paragraph}{Hidden layer}{15}
+\contentsline {paragraph}{Summary}{17}
+\contentsline {subsection}{\numberline {5.5}Multilayer perceptron (MLP)}{17}
+\contentsline {subsubsection}{\numberline {5.5.1}Forward}{17}
+\contentsline {subsubsection}{\numberline {5.5.2}Backward}{18}
+\contentsline {paragraph}{Output layer}{18}
+\contentsline {paragraph}{Second hidden layer}{18}
+\contentsline {paragraph}{First hidden layer}{19}
+\contentsline {subsection}{\numberline {5.6}Training}{19}
+\contentsline {subsubsection}{\numberline {5.6.1}Weight initialization}{19}
+\contentsline {subsubsection}{\numberline {5.6.2}Batch updates}{19}
+\contentsline {subsubsection}{\numberline {5.6.3}Optimizers}{20}
+\contentsline {paragraph}{Stochastic gradient descent}{20}
+\contentsline {paragraph}{Adagrad}{20}
+\contentsline {subsubsection}{\numberline {5.6.4}Regularization}{20}
+\contentsline {subsubsection}{\numberline {5.6.5}Class weighting}{21}
+\contentsline {subsubsection}{\numberline {5.6.6}Hyperparameter optimization}{21}
+\contentsline {subsection}{\numberline {5.7}Results}{21}
+\contentsline {subsubsection}{\numberline {5.7.1}RNN}{21}
+\contentsline {subsubsection}{\numberline {5.7.2}MLP}{21}
+\contentsline {subsection}{\numberline {5.8}Evaluation}{21}
