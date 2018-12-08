@@ -245,7 +245,8 @@ def validate(dataset, t, e):
                 f.write(word + ' ' + pred)
             f.write('\n')
 
-datasets = ['EN', 'CN', 'SG', 'FR']
-for dataset in datasets:
-    t, e = train(dataset)
-    validate(dataset, t, e)
+if __name__ == "__main__":
+    datasets = ['EN', 'FR']
+    for dataset in datasets:
+        t, e = train(dataset)
+        validate(dataset, t, e)

@@ -1,0 +1,1189 @@
+2
+
+Maximum Likelihood Estimation
+
+Our code for Part 2 is within the files Part2.py and Part2.ipynb.
+
+2.1
+
+Emission Parameters Estimation
+
+In order to derive the count values, we process the file as follows.
+Each line in the file represents a word followed by its label. For each label, we store the number of occurrences
+of each word in a dictionary with the key as the word, and the value as the number of occurrences. For a
+particular label, this results in a dictionary that looks something like the following:
+{’Nous’: 100, ’avons’: 101, ’tout’: 105, ’aim’: 7, ’.’: 1067, ... }
+We store this dictionary as the value of another dictionary, where the key represents the label. This results
+in the following dictionary:
+emissions = {’B-negative’: {’"’: 1, ’Accueil’: 7, ’Ambiance’: 2, ...},
+’B-positive’: { ... }, ... }
+This allows us to efficiently retrieve Count(y → x) using
+emissions[y][x]
+Similarly, for computational efficiency, we store the counts of each label in a separate dictionary:
+emission_counts = {’B-negative’: 675, ’B-neutral’: 113, ’B-positive’: 810,
+’I-negative’: 233, ’I-neutral’: 43, ’I-positive’: 181, ’O’: 24512}
+We can then easily retrieve Count(y) using
+emission_counts[x]
+This allows us to efficiently retrieve the emission parameters e(x|y), at the cost of a minor space complexity
+increase.
+
+2.2
+
+Laplace Smoothing
+
+For smoothing, we implement a getter function for the emission parameters. If the given word x does not
+exist in our parameters learnt from training data, we return the smoothed version of the parameters.
+def get_emission_parameters(emissions, emission_counts, x, y, k=1):
+’’’ Returns the MLE of the emission parameters based on the emissions dictionary ’’’
+state_data = emissions[y]
+count_y = emission_counts[y] #sum(state_data.values()) # Denominator
+# If x == "#UNK#", it will return the following
+count_y_x = k
+# If x exists in training, return its MLE instead
+if x != "#UNK#":
+count_y_x = state_data[x] # Numerator
+e = count_y_x / (count_y + k)
+return e{}
+
+2.3
+
+Sequence Labeling
+
+For sequence labeling, we implement a function that takes as input the sentence to be labeled, and the
+emission parameters as described in Section 2.1:
+def label_sequence(sentence, emissions, emission_counts):
+’’’ Takes a list ‘sentence‘ that contains words of a sentence as strings ’’’
+tags = []
+for word in sentence:
+predicted_label = ""
+max_prob = -1
+# Find y with maximum probability
+for y in emissions:
+if word not in observations:
+word = "#UNK#"
+if (word in emissions[y]) or (word == "#UNK#"):
+prob = get_emission_parameters(emissions, emission_counts, word, y)
+# If this is higher than the previous highest, use this
+if prob > max_prob:
+predicted_label = y
+max_prob = prob
+# Add prediction to list
+tags.append(predicted_label)
+return tags
+For each word, it finds the arg max over y, and assigns this as the tag. The final output of this function is a
+list containing the predicted tags.
+
+2.4
+
+Results
+
+Our results on the four datasets are as follows:
+Dataset
+EN
+SG
+CN
+FR
+
+3
+3.1
+
+F-Score
+Entity
+Entity
+Type
+0.6297
+0.4595
+0.2952
+0.1501
+0.1929
+0.1134
+0.2751
+0.1169
+
+First-Order Hidden Markov Model
+Transition Parameters Emission
+
+In order to derive the transition values, we process the file as follow.
+Each line in the file represents a word followed by its label. For each label, we create a transition denoted
+by a tuple (previous label, current label). For the first and last label in each sentence, we also
+
+add the transitions (START, label) and (label, STOP) respectively. This results in a dictionary that
+looks something like the following.
+{(’START’, ’O’): 1474, (’O’, ’O’): 21452, (’O’, ’STOP’): 1621, ...}
+In addition, for each tuple (a, b) that we add to the dictionary, we also add the counts of a and b to a
+separate dictionary. This allows us to obtain the counts of each transition, as follows.
+{’START’: 1632, ’O’: 24512, ’B-positive’: 810, ’I-positive’: 181,
+’B-negative’: 675, ’B-neutral’: 113, ’I-negative’: 233, ’I-neutral’: 43}
+This allows us to efficiently retrieve Count(yi−1 , yi ) and Count(yi−1 ), and obtain the transition parameters
+q(yi |yi−1 ) =
+
+Count(yi−1 , yi )
+Count(yi−1 )
+
+Note that STOP is not necessary in the second dictionary, since there will never be a transition from STOP.
+∗
+∗
+In addition, when Count(yi−1
+) = 0, we simply allow q(yi |yi−1
+) = 0.
+
+3.2
+
+Viterbi Algorithm
+
+Combining Parts 2 and 3, we now have the estimated transition and emission parameters. We will denote
+them as
+Count(u, v)
+au,v = q(v|u) =
+Count(u)
+Count(u → xj )
+bu (xj ) = e(x|y) =
+Count(u)
+For each sequence , a pandas.DataFrame object of size |T | × (n + 2) is used to store the probabilities of a
+given state at a given time, where n is the length of the sequence, and T is the set of all states in training.
+(n + 2) is used to include the START and STOP observations as well.
+Similarly, another pandas.DataFrame object of the same size is created as a backpointer table to perform
+the backtracing algorithm. The probability table will be known as P while the backpointer table will be
+known as B.
+3.2.1
+
+Initialization
+
+We begin by initializing π(0, START) = 1.
+P.loc[’START’, 0] = 1
+3.2.2
+
+Recursion
+
+Next, as per the Viterbi algorithm:
+π(j, v) = max{π(j − 1, u) · au,v · bv (xj )}, ∀ v ∈ T
+u∈T
+
+In addition, we also use the backpointer table to store the state transition (yj−1 , yj ):
+β(j, v) = arg max{π(j − 1, u) · au,v · bv (xj )}, ∀ v ∈ T
+u∈T
+
+x_j = obs_seq[j-1]
+for v in states: # current state
+for u in states: # previous state
+p = P.loc[u, j-1] * a(u, v) * b(v, x)
+if p > P.loc[v, j]: # keep larger probability
+P.loc[v, j] = p # update probability
+B.loc[v, j] = u # update backpointer
+This operation is repeated for j = {1, ..., n + 1}, where xn+1 = STOP.
+
+3.2.3
+
+Backtracking
+
+Finally, once the Viterbi algorithm is complete, we use the backpointer table to obtain the state sequence.
+yn = β(n + 1, STOP)
+yj−1 = β(j, yj ), ∀ j ∈ {n − 1, ..., 2, 1}
+The Python implementation of this is as follows:
+state_seq = [’STOP’] # initialization
+for i in range(n-1, 0, -1): # {n-1, ..., 2, 1}
+curr_state = state_seq[-1] # y_j
+prev_state = B.loc[curr_state, i] # y_{j-1}
+state_seq.append(prev_state)
+In special cases where there is no observed transition (i.e. P (yj−1 |yj ) = 0), we might obtain an observation
+sequence x1 , x2 , ..., xn that has a probability of 0. In this scenario, we simply predict a sequence of O’s.
+
+3.3
+
+Results
+
+Our results on the four datasets are as follows:
+Dataset
+EN
+SG
+CN
+FR
+
+F-Score
+Entity
+Entity
+Type
+0.6379
+0.5556
+0.4185
+0.2531
+0.3955
+0.2700
+0.3994
+0.2232
+
+4
+
+Second-Order Hidden Markov Model
+
+5
+
+Design Challenge
+
+5.1
+5.1.1
+
+Preprocessing
+String tokenization
+
+Each file can be considered a corpus, the documents being each sentence in the file. Tokenizing was carried
+out by converting each sentence into a list of words. During tokenization, all whitespace was stripped from
+the beginning and end of each word. Also, each token is normalized by converting to lowercase.
+5.1.2
+
+Replacing irrelevant words
+
+In the initial problem, the training data contains a large vocabulary of words which occurred only a single
+time. To mitigate this issue, several types of words were converted into various placeholders instead, as they
+do not carry semantic meaning.
+The placeholders used are as follows:
+1.
+
+#PUNC#: strings that do not contain alphanumeric characters
+
+2.
+
+#HASH#: hashtags (strings beginning with a # character)
+
+3.
+
+#AT#: @ mentions (strings beginning with a @ character)
+
+4.
+
+#NUM#: strings that contain only digits
+
+5.
+
+#URL#: strings that begin with http: and end with .com
+
+5.1.3
+
+Stop words
+
+Stop words were also initially converted to a token labeled #STOP#. However, during evaluation on the EN
+and SG dataset with Part 3, it was shown to reduce the F1 score on both the Correct Entity and Correct
+Entity Type tasks. It was also shown to produce poorer F1 scores on the EN dataset with Part 5.
+Taking into account the negative correlation between removing stop words and F1 scores, as well as the fact
+that we do not have French stop words, we decided not to remove stop words from the training data.
+
+5.2
+
+Simple vectorization
+
+We discuss an implementation to convert each word into a vector, allowing us to train a recurrent neural
+network (RNN) with the text sequences.
+5.2.1
+
+Tokenizing
+
+Tokenizing transforms each text into a sequence of integers, which allows us to vectorize the text corpus.
+We first obtain a vocabulary of all unique words that have appeared in the training data. We then assign a
+unique integer to each word, as well as 1 additional integer for the #UNK# token, which denotes words not
+present in the vocabulary.
+{’rt’: 0,
+’#AT#’: 1,
+’#PUNC#’: 2,
+’encore’: 3,
+...,
+’bpa’: 2502,
+’#UNK#’: 2503}
+The following is a sample output sequence that has been tokenized:
+# input: ’rt #AT# #PUNC# encore #PUNC# #AT# for ... #PUNC#’
+[ 0, 1, 2, 3, 2, 1, 4, ..., 2]
+5.2.2
+
+One-hot encoding
+
+Once each word has been converted into a corresponding integer, each integer is then converted into a vector
+via one-hot encoding.
+Let V be the set of all words in the training vocabulary, including #UNK#. Then, one-hot encoding maps
+each input to a vector, f : R → R|V| .
+
+1, if i = n
+f (n)i =
+0, otherwise
+
+5.3
+
+word2vec
+
+word2vec is used as a feature extraction method, to convert the sparse one-hot encoding into dense vectors.
+5.3.1
+
+Skip-gram
+
+A skip-gram architecture with a window size of 5 is used for the training of the word2vec. This means
+that given a sequence of words x(1) , x(2) , ..., x(n) , for an input variable x(i) , the target variable y (i) ∈
+{x(i−2) , x(i−1) , x(i+1) , x(i+2) }.
+We initialize two sets of weights, W ∈ R300×|V| and U ∈ R|V|×300 , with each value drawn from a normal
+distribution N ∼ (0, 0.12 ).
+
+5.3.2
+
+Forward
+
+The model is defined as such:
+x(i) , y (i) ∈ R|V|
+h(i) = W x(i)
+o(i) = U h(i)
+
+(5.1)
+
+ŷ (i) = softmax(o(i) )
+X
+L=−
+y (i) · log(ŷ (i) )
+y (i)
+
+The loss function is the sum of the cross-entropy loss between all target variables in the context, and the
+predicted variable.
+5.3.3
+
+5.3.4
+
+Backward
+∂L(i)
+= softmax(o(i) ) − y (i)
+∂o(i)
+= ŷ (i) − y (i)
+
+(5.2)
+
+∂L(i) ∂o(i)
+∂L(i)
+=
+∂U
+∂o(i) ∂U
+T
+= (ŷ (i) − y (i) )h(i)
+
+(5.3)
+
+∂L(i)
+∂L(i) ∂o(i)
+=
+(i)
+∂h
+∂o(i) ∂h(i)
+= U T (ŷ (i) − y (i) )
+
+(5.4)
+
+∂L(i) ∂h(i)
+∂L(i)
+=
+∂W
+∂h(i) ∂W
+T
+= U T (ŷ (i) − y (i) )x(i)
+
+(5.5)
+
+Training
+
+Positive sampling
+For each word in every sentence, we take that word to be the center word. Then, for each word in its context,
+we update the weights according to the equations above.
+Negative sampling
+For each word in every sentence, we take that word to be the center word. We also obtain the context words.
+Next, we sample 20 words from the vocabulary, excluding the center and context words. The probability of
+sampling a word w is given by the following equation:
+3
+
+P (w) = P
+
+Count(w) 4
+
+w0 (Count(w
+
+0 ) 43 )
+
+The corresponding loss function for the negative samples is then given by:
+X
+L=−
+−y (i) · log(ŷ (i) )
+y (i)
+
+Figure 1: t-SNE visualization of word2vec model on EN dataset
+5.3.5
+
+Visualization
+
+We use t-SNE to reduce each word vector to 2 dimensions for visualization.
+The results are shown in Figure 1.
+5.3.6
+
+Inference
+
+During inference, both weights W , U are combined via averaging.
+1
+(W + U T )x
+2
+It is also common to find words in the validation and test sets that are not found in the training set. As
+such, these words are not in the word2vec vocabulary.
+h=
+
+Instead of simply treating these words as an #UNK# token, they were represented as the mean of their
+context, within a window of size 5.
+xi =
+
+1
+(xi−2 + xi−1 + xi+1 + xi+2 )
+4
+
+5.4
+5.4.1
+
+Recurrent neural network (RNN)
+Forward
+
+We use a RNN, with a computational graph as shown in Figure 2. The RNN maps an input sequence x to
+an output sequence o. The predicted labels are then given by ŷ = softmax(o).
+
+Figure 2: RNN
+The loss function L compares the predicted labels ŷ with the target labels y through cross-entropy loss,
+where C is the number of classes in the classification task.
+L=−
+
+C
+X
+
+yi · log(ŷi )
+
+i
+
+The remaining nodes in the graph are computed as shown in Equation 5.6.
+a(t) = b + U x(t) + W h(t−1)
+h(t) = tanh(a(t) )
+o(t) = c + V h(t)
+
+(5.6)
+
+ŷ (t) = softmax(o(t) )
+U , W , V are the weight matrices, while b, c are biases. By choice of hyperparameters, h(t) ∈ R128×1 .
+For an input sequence, x(1) , x(2) , ..., x(n) , we first compute the hidden units h(t) as shown in Equation 5.7.
+At t = 1, the hidden unit is computed using only x(1) . Once we have the value of h(t) , we can then compute
+its predicted state ŷ (t) with Equation 5.6.
+h(1) = tanh(b + U x(1) )
+h(t) = tanh(b + U x(t) + W h(t−1) ), ∀ t ∈ {2, ..., n}
+
+(5.7)
+
+5.4.2
+
+Backward
+
+To perform backpropagation, our objective is to obtain the partial differential of L with respect to the
+weights and biases. The gradients are taken to be the sum over all time steps t ∈ {1, ..., n}.
+Output layer
+∂L(t)
+= softmax(o(t) ) − y (t)
+∂o(t)
+= ŷ (t) − y (t)
+
+(5.8)
+
+n
+
+∂L X ∂L(t) ∂o(t)
+=
+∂c
+∂o(t) ∂c
+t=1
+=
+=
+
+n
+X
+∂(c + V h(t) )
+(ŷ (t) − y (t) )
+∂c
+t=1
+n
+X
+
+(5.9)
+
+(ŷ (t) − y (t) )
+
+t=1
+n
+
+X ∂L(t) ∂o(t)
+∂L
+=
+∂V
+∂o(t) ∂V
+t=1
+=
+=
+
+n
+X
+∂(c + V h(t) )
+(ŷ (t) − y (t) )
+∂V
+t=1
+n
+X
+
+(5.10)
+
+T
+
+(ŷ (t) − y (t) ) h(t)
+
+t=1
+
+Hidden layer
+∂L
+To compute the gradients of the hidden units ∂h
+(t) , we initialize the gradient at t = n, since it has no
+subsequent time step, and its gradient is dependent only on o(n) .
+o(n)
+V
+...
+
+h(n)
+
+...
+
+Figure 3: Computational graph showing gradients for h(n)
+
+∂L(n)
+∂L(n) ∂o(n)
+=
+(n)
+∂h
+∂o(n) ∂h(n)
+∂(c + V h(n) )
+∂h(n)
+T
+(n)
+(n)
+= V (ŷ − y )
+= (ŷ (n) − y (n) )
+
+(5.11)
+
+Now, we can formulate the rest of the gradients recursively.
+
+o(t)
+
+o(t+1)
+
+V
+...
+
+h(t)
+
+W
+
+...
+
+h(t+1)
+
+...
+
+...
+
+Figure 4: Computational graph showing gradients for h(t)
+
+∂L(t)
+∂L(t) ∂o(t)
+∂L(t+1) ∂h(t+1)
+=
++
+(t)
+(t)
+(t)
+∂h
+∂o ∂h
+∂h(t+1) ∂h(t)
+From the result in Equation 5.11, we have that
+∂L(t) ∂o(t)
+= V T (ŷ (t) − y (t) )
+∂o(t) ∂h(t)
+∂L(t+1) ∂h(t+1) ∂a(t+1)
+∂L(t+1) ∂h(t+1)
+=
+∂h(t+1) ∂h(t)
+∂h(t+1) ∂a(t+1) ∂h(t)
+∂L(t+1) ∂(tanh(a(t+1) )) ∂(b + U x(t+1) + W h(t) )
+=
+∂h(t+1)
+∂a(t+1)
+∂h(t)
+(t+1)
+(t+1)
+∂L
+∂(tanh(a
+))
+= WT
+(t+1)
+(t+1)
+∂h
+∂a
+∂L(t+1)
+= W T diag(1 − (h(t+1) )2 ) (t+1)
+∂h
+Combining the above results, we obtain
+∂L(t)
+∂L(t) ∂o(t)
+∂L(t+1) ∂h(t+1)
+=
++
+∂h(t)
+∂o(t) ∂h(t)
+∂h(t+1) ∂h(t)
+= V T (ŷ (t) − y (t) ) + W T diag(1 − (h(t+1) )2 )
+
+It is next imperative to show that the Jacobian J (t+1) =
+We begin with the knowledge that
+
+d
+dx tanh(x)
+
+∂h(t+1)
+∂a(t+1)
+
+= 1 − tanh2 (x).
+(t+1)
+
+(t+1)
+
+Jij
+(t)
+
+For i 6= j, Jij = 0.
+
+=
+
+∂hi
+
+(t+1)
+
+∂aj
+
+=
+
+∂L
+∂h(t+1)
+
+∂(tanh(a(t+1) ))
+∂a(t+1)
+
+(5.12)
+
+= diag(1 − (h(t+1) )2 ).
+
+For i = j,
+(t+1)
+
+(t+1)
+
+Jii
+
+=
+
+∂hi
+
+=
+
+(t+1)
+
+∂(tanh(a(t+1) )i )
+
+∂ai
+
+(t+1)
+
+∂ai
+
+= 1 − tanh2 (a(t+1) )i
+(t+1) 2
+
+= 1 − (hi
+
+∴ J (t) =
+
+∂h(t)
+∂a(t)
+
+
+(t)
+1 − (h1 )2
+
+0
+
+=
+
+...
+0
+
+0
+(t)
+1 − (h2 )2
+...
+0
+
+...
+...
+(t)
+1 − (hi )2
+...
+
+)
+
+
+0
+
+0
+
+ = diag(1 − (h(t) )2 )
+
+...
+(t)
+1 − (hn )2
+
+We can then use this result to obtain the gradients with respect to b, W , U .
+n
+
+∂L X ∂L(t) ∂h(t) ∂a(t)
+=
+∂b
+∂h(t) ∂a(t) ∂b
+t=1
+=
+=
+
+n
+X
+t=1
+n
+X
+
+diag(1 − (h(t) )2 )
+
+∂L(t) ∂(b + U x(t) + W h(t−1) )
+∂b
+∂h(t)
+
+diag(1 − (h(t) )2 )
+
+∂L(t)
+∂h(t)
+
+t=1
+
+(5.13)
+
+n
+
+X ∂L(t) ∂h(t) ∂a(t)
+∂L
+=
+∂W
+∂h(t) ∂a(t) ∂W
+t=1
+=
+=
+
+n
+X
+t=1
+n
+X
+
+diag(1 − (h(t) )2 )
+
+∂L(t) ∂(b + U x(t) + W h(t−1) )
+∂W
+∂h(t)
+
+diag(1 − (h(t) )2 )
+
+∂L(t) (t−1)T
+h
+∂h(t)
+
+t=1
+
+(5.14)
+
+n
+
+X ∂L(t) ∂h(t) ∂a(t)
+∂L
+=
+∂U
+∂h(t) ∂a(t) ∂U
+t=1
+=
+=
+
+n
+X
+t=1
+n
+X
+t=1
+
+diag(1 − (h(t) )2 )
+
+∂L(t) ∂(b + U x(t) + W h(t−1) )
+∂U
+∂h(t)
+
+diag(1 − (h(t) )2 )
+
+∂L(t) (t)T
+x
+∂h(t)
+
+(5.15)
+
+Summary
+n
+
+X
+T
+∂L
+∂L(t)
+=
+diag(1 − (h(t) )2 ) (t) x(t)
+∂U
+∂h
+t=1
+n
+
+X
+T
+∂L
+∂L(t)
+=
+diag(1 − (h(t) )2 ) (t) h(t−1)
+∂W
+∂h
+t=1
+n
+
+∂L X
+∂L(t)
+=
+diag(1 − (h(t) )2 ) (t)
+∂b
+∂h
+t=1
+
+(5.16)
+
+n
+
+X
+T
+∂L
+=
+(ŷ (t) − y (t) ) h(t)
+∂V
+t=1
+n
+
+∂L X (t)
+=
+(ŷ − y (t) )
+∂c
+t=1
+
+5.5
+5.5.1
+
+Multilayer perceptron (MLP)
+Forward
+
+We first define the computational graph for a 2-layer MLP, our architecture of choice.
+
+x
+
+W
+
+h1
+
+V
+
+h2
+
+U
+
+o
+
+softmax
+
+ŷ
+
+Figure 5: MLP computational graph
+Similar to the RNN, the input is defined by x, the predicted label ŷ, and the target labels y. The loss
+function L is again the cross-entropy loss.
+The rest of the graph is defined as such:
+a1 = W x + b
+h1 = ReLU(a1 )
+a2 = V h1 + c
+h2 = ReLU(a1 )
+
+(5.17)
+
+o = U h2 + d
+ŷ = softmax(o)
+5.5.2
+
+Backward
+
+The equations for backpropagation of the MLP are defined similar to the RNN.
+Output layer
+∂L
+= softmax(o − y)
+∂o
+= ŷ − y
+
+(5.18)
+
+∂L
+∂L ∂o
+=
+∂d
+∂o ∂d
+∂L
+=
+∂o
+
+(5.19)
+
+∂L
+∂L ∂o
+=
+∂U
+∂o ∂U
+∂L T
+h
+=
+∂o 2
+
+(5.20)
+
+∂L
+∂L ∂o
+=
+∂h2
+∂o ∂h2
+∂L
+= UT
+∂o
+
+(5.21)
+
+∂L ∂h2
+∂L
+=
+∂a2
+∂h ∂a2
+
+
+ 2
+∂h2
+1, (a2 )i ≥ 0
+=
+0, (a2 )i < 0
+∂a2 i
+
+(5.22)
+
+∂L
+∂L ∂a2
+=
+∂c
+∂a2 ∂c
+∂L
+=
+∂a2
+
+(5.23)
+
+∂L ∂a2
+∂L
+=
+∂V
+∂a2 ∂V
+∂L T
+=
+h
+∂a2 1
+
+(5.24)
+
+∂L ∂a2
+∂L
+=
+∂h1
+∂a2 ∂h1
+∂L
+=VT
+∂a2
+
+(5.25)
+
+∂L ∂h1
+∂L
+=
+∂a1
+∂h1 ∂a1
+
+
+
+∂h1
+1, (a1 )i ≥ 0
+=
+0, (a1 )i < 0
+∂a1 i
+
+(5.26)
+
+∂L
+∂L ∂a1
+=
+∂b
+∂a1 ∂b
+∂L
+=
+∂a1
+
+(5.27)
+
+∂L
+∂L ∂a1
+=
+∂W
+∂a1 ∂W
+∂L T
+=
+x
+∂a1
+
+(5.28)
+
+Second hidden layer
+
+First hidden layer
+
+5.6
+5.6.1
+
+Training
+Weight initialization
+
+All weights were initialized with values sampled from a Gaussian distribution N ∼ {0, 0.12 }.
+All biases were initialized with a constant value 0.1.
+W = np.random.normal(0, 0.1, size=[300, 128])
+b = np.ones(shape=[1, 128]) * 0.1
+5.6.2
+
+Batch updates
+
+The weight updates were done in batches. b sentences were randomly chosen, where b is a hyperparameter.
+The gradients of each sentence were first independently obtained. Then, the mean of those gradients were
+taken and applied to the weights.
+This helped to smooth the loss decrease over training. We compare the value of the training loss over time
+before and after implementing batch updates in Figure 6.
+
+(a) Before batch updates
+
+(b) After batch updates
+
+Figure 6: Training loss against epochs
+
+5.6.3
+
+Optimizers
+
+Stochastic gradient descent
+SGD was the initial choice of optimizer due to its ease of implementation. However, it was shown to perform
+poorly on class imbalance without strong regularization.
+Adagrad
+Adagrad was then used in place of SGD. This yielded highly favourable results.
+cum_grad = [np.zeros_like(weight) for weight in model]
+for i in range(n):
+loss, grad = backward(*model, x=x, y=y)
+# gradient accumulation
+for cum_weight, weight_update in zip(cum_grad, grad):
+cum_weight += np.square(weight_update)
+# gradient update
+for weight, cum_weight, weight_update in zip(model, cum_grad, grad):
+weight -= (lr / (np.sqrt(cum_weight) + 1e-6)) * weight_update
+
+5.6.4
+
+Regularization
+
+We add L2 regularization to the weights U , W , V .
+This adds an additional term to their gradients, e.g. λkU k1 , where λ is the regularization penalty coefficient.
+The regularization term helped to deal with the class imbalance in the labels during training of the RNN.
+The class imbalance is illustrated in Figure 7.
+
+Figure 7: Distribution of labels in FR dataset
+
+5.6.5
+
+Class weighting
+
+The class imbalance as illustrated in Figure 7 caused the model to over-predict a particular class, resulting
+in very recall.
+In order to correct the class imbalance, the gradient function was modified to include class weights w:
+∂L(t)
+= (ŷ (t) − y (t) ) ◦ w
+∂o(t)
+where ◦ is the element-wise multiplication between the two vectors.
+However, by introducing class weights, it was found that the precision of the results drastically worsened.
+As such, class weighting was not used.
+5.6.6
+
+5.7
+
+Hyperparameter optimization
+
+Results
+
+We compare the results on the EN and FR datasets between the RNN and MLP method.
+5.7.1
+
+RNN
+Dataset
+EN
+FR
+
+5.7.2
+
+MLP
+
+F-Score
+Entity
+Entity
+Type
+0.572
+0.268
+0.136
+0.094
+
+Dataset
+EN
+FR
+
+F-Score
+Entity
+Entity
+Type
+TBD
+TBD
+TBD
+TBD
+
+
